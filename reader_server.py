@@ -61,6 +61,8 @@ PORT = 8081
 
 DATA_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "data")
+STATIC_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "reader")
 BOOKS_DIR = os.path.join(DATA_DIR, "books")
 COVERS_DIR = os.path.join(DATA_DIR, "covers")
 LIBRARY_FILE = os.path.join(DATA_DIR, "library.json")
@@ -1023,6 +1025,22 @@ def _resolve_toc(toc_raw: list[dict],
 
 
 # ---------------------------------------------------------------------------
+# MIME types for static file serving
+# ---------------------------------------------------------------------------
+_MIME = {
+    ".html": "text/html; charset=utf-8",
+    ".css":  "text/css; charset=utf-8",
+    ".js":   "application/javascript; charset=utf-8",
+    ".json": "application/json",
+    ".png":  "image/png",
+    ".jpg":  "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".svg":  "image/svg+xml",
+    ".ico":  "image/x-icon",
+    ".woff2":"font/woff2",
+    ".ttf":  "font/ttf",
+}
+
 # HTTP handler
 # ---------------------------------------------------------------------------
 class Handler(BaseHTTPRequestHandler):
@@ -1079,6 +1097,25 @@ class Handler(BaseHTTPRequestHandler):
             return None, "JSON body must be an object"
         return obj, None
 
+    # -- static file helper -------------------------------------------------
+    def _serve_file(self, filepath: str) -> None:
+        """Serve a static file with appropriate MIME type and caching."""
+        if not os.path.isfile(filepath):
+            return self._error(404, "not found: " + filepath)
+        ext = os.path.splitext(filepath)[1].lower()
+        mime = _MIME.get(ext, "application/octet-stream")
+        try:
+            with open(filepath, "rb") as fh:
+                data = fh.read()
+            self.send_response(200)
+            self.send_header("Content-Type", mime)
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "public, max-age=3600")
+            self.end_headers()
+            self.wfile.write(data)
+        except OSError:
+            return self._error(500, "could not read: " + filepath)
+
     # -- routing -----------------------------------------------------------
     def do_POST(self):  # noqa: N802
         parsed = urlparse(self.path)
@@ -1113,6 +1150,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self._book(path, qs)
             if path.startswith("/api/reader/cover/"):
                 return self._cover(path, qs)
+            # Serve static files (frontend UI)
+            if path == "/":
+                path = "/index.html"
+            static_path = os.path.join(STATIC_DIR, path.lstrip("/"))
+            if os.path.isfile(static_path):
+                return self._serve_file(static_path)
             return self._error(404, "unknown route: " + path)
         except FileNotFoundError as e:
             return self._error(404, str(e))

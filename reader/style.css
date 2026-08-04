@@ -24,6 +24,40 @@
   --dot-fs-reader-mobile: 17px;   /* tightened on small screens */
   --dot-fs-reader-art:    48px;   /* large decorative glyph    */
 }
+/* ------------------------------------------------------------
+   Reading themes — three colour palettes for the reading view.
+   The Chrome (sidebar, toolbar, app bar) always stays dark;
+   only the reading column switches palettes. Default: sepia.
+   ------------------------------------------------------------ */
+:root {
+  /* Sepia — Kindle-like warm paper (default) */
+  --reader-page-bg:    #FBF0D9;
+  --reader-page-text:  #5F4B32;
+  --reader-page-accent:#8B7355;
+  --reader-page-border:#E8DCC8;
+}
+
+[data-reader-theme="sepia"] {
+  --reader-page-bg:    #FBF0D9;
+  --reader-page-text:  #5F4B32;
+  --reader-page-accent:#8B7355;
+  --reader-page-border:#E8DCC8;
+}
+
+[data-reader-theme="light"] {
+  --reader-page-bg:    #FFFFFF;
+  --reader-page-text:  #1A1A1A;
+  --reader-page-accent:#4A4A4A;
+  --reader-page-border:#E0E0E0;
+}
+
+[data-reader-theme="dark"] {
+  --reader-page-bg:    #1E1E22;
+  --reader-page-text:  #D4D4D4;
+  --reader-page-accent:#8A8A8A;
+  --reader-page-border:#2E2E33;
+}
+
 
 /* ------------------------------------------------------------
    Layout shell
@@ -594,6 +628,9 @@ body.is-reading .reader-library { display: none; }
   background: var(--dot-bg);
   cursor: default;
 }
+.reader-view__page-wrap {
+  background: var(--reader-page-bg);
+}
 .reader-view[hidden] { display: none; }
 
 /* Top bar + bottom nav: float over the page and fade out when idle so the
@@ -717,7 +754,8 @@ body.is-reading .reader-library { display: none; }
   width: 100%;
   font-size: var(--dot-fs-reader);
   line-height: 1.8;
-  color: var(--dot-text-primary);
+  color: var(--reader-page-text);
+  background: var(--reader-page-bg);
   word-wrap: break-word;
   text-align: left;
   hyphens: auto;
@@ -916,7 +954,7 @@ body.is-reading .reader-library { display: none; }
     position: absolute;
     inset: 0;
     z-index: auto;
-    background: var(--dot-bg);
+    background: var(--reader-page-bg);
   }
 }
 

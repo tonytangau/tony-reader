@@ -86,6 +86,7 @@
   // ---- Reading preferences (persisted) -------------------------------
   const FONT_SIZE_KEY = 'dot.reader.font';
   const FONT_FAMILY_KEY = 'dot.reader.fontFamily';
+const THEME_KEY = 'dot.reader.theme';
   const FONT_MIN = 14, FONT_MAX = 28, FONT_STEP = 2;
   const FONT_FAMILIES = ['serif', 'sans', 'mono'];
 
