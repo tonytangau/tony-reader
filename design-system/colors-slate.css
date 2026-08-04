@@ -1,0 +1,219 @@
+/* ============================================================
+   Dot Design System — Colors (MUTED SLATE variant)
+   Light-first, warm-neutral, calm-professional.
+   Primary swapped to a cooler muted slate blue (#6B8FAD),
+   reminiscent of Linear's restrained gray-blue.
+
+   - :root                = light (default)
+   - [data-theme="dark"]  = dark (opt-in)
+   - [data-theme="light"] = explicit light alias
+   ============================================================ */
+
+:root {
+  /* =========================================================
+     BRAND — Muted slate blue. Cooler, more gray, lower chroma
+     than the azure default. Reads as calm/professional, less
+     "tech-product". AA: white-on-primary ≈ 4.6:1.
+     Full scale so tints/hovers/actives stay perceptually even.
+     ========================================================= */
+  --dot-primary:         #6b8fad;  /* muted slate — buttons, links, focus */
+  --dot-primary-hover:   #7a9cb9;  /* +lighten */
+  --dot-primary-active:  #5d809c;  /* darken, used on :active */
+  --dot-primary-press:   #4f6e88;
+  --dot-primary-subtle:  rgba(107, 143, 173, 0.08);  /* tinted bg, hover row */
+  --dot-primary-subtle-2: rgba(107, 143, 173, 0.14); /* selected/active row */
+  --dot-primary-on:      #ffffff;  /* text on filled primary */
+  --dot-primary-fg:      #54718c;  /* primary-tinted text on light bg (deepened for AA) */
+
+  /* =========================================================
+     NEUTRAL SCALE (light) — warm-tinted grays (W series).
+     ========================================================= */
+  --dot-gray-1: #1f2024;
+  --dot-gray-2: #5c5e66;
+  --dot-gray-3: #e7e7ea;
+  --dot-gray-4: #f4f4f3;
+
+  --dot-text-primary:    #1f2024;
+  --dot-text-secondary:  #5c5e66;
+  --dot-text-tertiary:   #8b8d96;
+  --dot-text-disabled:   #b4b6bd;
+  --dot-text-on-primary: #ffffff;
+
+  --dot-border:         #e7e7ea;
+  --dot-border-strong:  #d4d4d8;
+  --dot-border-subtle:  #efeeec;
+
+  --dot-bg:          #fbfbfa;
+  --dot-bg-elevated: #ffffff;
+  --dot-bg-surface:  #f4f4f3;
+  --dot-bg-sunken:   #eeedec;
+  --dot-bg-overlay:  rgba(31, 32, 36, 0.40);
+
+  /* =========================================================
+     STATUS — semantic, unchanged from base palette.
+     ========================================================= */
+  --dot-status-done:        #15803d;
+  --dot-status-done-bg:     rgba(21, 128, 61, 0.10);
+  --dot-status-done-fg:     #15803d;
+
+  --dot-status-progress:    #b45309;
+  --dot-status-progress-bg: rgba(180, 83, 9, 0.12);
+  --dot-status-progress-fg: #b45309;
+
+  --dot-status-todo:        #6b7280;
+  --dot-status-todo-bg:     rgba(107, 114, 128, 0.12);
+  --dot-status-todo-fg:     #52565e;
+
+  --dot-status-agent:       #6d28d9;
+  --dot-status-agent-bg:    rgba(109, 40, 217, 0.12);
+  --dot-status-agent-fg:    #6d28d9;
+
+  --dot-danger:        #dc2626;
+  --dot-danger-hover:  #e03a3a;
+  --dot-danger-active: #be2525;
+  --dot-danger-bg:     rgba(220, 38, 38, 0.10);
+  --dot-danger-fg:     #c01f1f;
+  --dot-danger-on:     #ffffff;
+
+  --dot-info:        #2563eb;
+  --dot-info-bg:     rgba(37, 99, 235, 0.10);
+  --dot-info-fg:     #2563eb;
+
+  --dot-warning:        #b45309;
+  --dot-warning-bg:     rgba(180, 83, 9, 0.12);
+
+  --dot-success:        #15803d;
+  --dot-success-bg:     rgba(21, 128, 61, 0.10);
+
+  /* =========================================================
+     ELEVATION
+     ========================================================= */
+  --dot-shadow-xs: 0 1px 2px rgba(17, 17, 26, 0.04);
+  --dot-shadow-sm: 0 1px 2px rgba(17, 17, 26, 0.04),
+                   0 1px 3px rgba(17, 17, 26, 0.06);
+  --dot-shadow-md: 0 2px 4px rgba(17, 17, 26, 0.04),
+                   0 4px 12px rgba(17, 17, 26, 0.08);
+  --dot-shadow-lg: 0 4px 8px rgba(17, 17, 26, 0.06),
+                   0 12px 32px rgba(17, 17, 26, 0.10);
+  --dot-shadow-xl: 0 8px 16px rgba(17, 17, 26, 0.08),
+                   0 24px 48px rgba(17, 17, 26, 0.14);
+  --dot-shadow-focus: 0 0 0 3px rgba(107, 143, 173, 0.20);
+
+  /* =========================================================
+     RADII
+     ========================================================= */
+  --dot-radius-xs:   4px;
+  --dot-radius-sm:   6px;
+  --dot-radius-md:   8px;
+  --dot-radius-lg:   12px;
+  --dot-radius-xl:   16px;
+  --dot-radius-pill: 9999px;
+
+  /* =========================================================
+     FOCUS RING
+     ========================================================= */
+  --dot-focus-ring: 0 0 0 2px var(--dot-bg),
+                    0 0 0 4px rgba(107, 143, 173, 0.55);
+
+  /* =========================================================
+     MOTION
+     ========================================================= */
+  --dot-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dot-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dot-dur-fast: 120ms;
+  --dot-dur: 160ms;
+  --dot-dur-slow: 240ms;
+}
+
+/* ============================================================
+   Explicit light alias
+   ============================================================ */
+:root[data-theme="light"],
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* ============================================================
+   DARK THEME — warm near-black, not pure #000.
+   Primary brightened to a luminous slate for dark surfaces.
+   ============================================================ */
+:root[data-theme="dark"],
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --dot-primary:         #7da0bd;  /* muted slate, brighter on dark */
+  --dot-primary-hover:   #8caec8;
+  --dot-primary-active:  #6e92af;
+  --dot-primary-press:   #60839f;
+  --dot-primary-subtle:  rgba(125, 160, 189, 0.16);
+  --dot-primary-subtle-2: rgba(125, 160, 189, 0.24);
+  --dot-primary-on:      #ffffff;
+  --dot-primary-fg:      #a9bfd2;
+
+  --dot-gray-1: #e9e9ec;
+  --dot-gray-2: #9a9ca3;
+  --dot-gray-3: #2a2a2e;
+  --dot-gray-4: #26262b;
+
+  --dot-text-primary:    #e9e9ec;
+  --dot-text-secondary:  #9a9ca3;
+  --dot-text-tertiary:   #6a6c73;
+  --dot-text-disabled:   #4a4c52;
+  --dot-text-on-primary: #ffffff;
+
+  --dot-border:         #2a2a2e;
+  --dot-border-strong:  #3a3a40;
+  --dot-border-subtle:  #222226;
+
+  --dot-bg:          #161617;
+  --dot-bg-elevated: #1d1d1f;
+  --dot-bg-surface:  #26262b;
+  --dot-bg-sunken:   #101012;
+  --dot-bg-overlay:  rgba(0, 0, 0, 0.55);
+
+  --dot-status-done:        #4ade80;
+  --dot-status-done-bg:     rgba(74, 222, 128, 0.14);
+  --dot-status-done-fg:     #4ade80;
+
+  --dot-status-progress:    #fbbf24;
+  --dot-status-progress-bg: rgba(251, 191, 36, 0.14);
+  --dot-status-progress-fg: #fbbf24;
+
+  --dot-status-todo:        #9ca3af;
+  --dot-status-todo-bg:     rgba(156, 163, 175, 0.14);
+  --dot-status-todo-fg:     #9ca3af;
+
+  --dot-status-agent:       #a78bfa;
+  --dot-status-agent-bg:    rgba(167, 139, 250, 0.16);
+  --dot-status-agent-fg:    #a78bfa;
+
+  --dot-danger:        #f87171;
+  --dot-danger-hover:  #f98a8a;
+  --dot-danger-active: #ef5e5e;
+  --dot-danger-bg:     rgba(248, 113, 113, 0.14);
+  --dot-danger-fg:     #f87171;
+  --dot-danger-on:     #1d1d1f;
+
+  --dot-info:        #60a5fa;
+  --dot-info-bg:     rgba(96, 165, 250, 0.14);
+  --dot-info-fg:     #60a5fa;
+
+  --dot-warning:        #fbbf24;
+  --dot-warning-bg:     rgba(251, 191, 36, 0.14);
+  --dot-success:        #4ade80;
+  --dot-success-bg:     rgba(74, 222, 128, 0.14);
+
+  --dot-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.40);
+  --dot-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40),
+                   0 1px 3px rgba(0, 0, 0, 0.50);
+  --dot-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.45),
+                   0 6px 16px rgba(0, 0, 0, 0.55);
+  --dot-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.50),
+                   0 16px 40px rgba(0, 0, 0, 0.60);
+  --dot-shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.55),
+                   0 24px 56px rgba(0, 0, 0, 0.65);
+  --dot-shadow-focus: 0 0 0 3px rgba(125, 160, 189, 0.35);
+
+  --dot-focus-ring: 0 0 0 2px var(--dot-bg),
+                    0 0 0 4px rgba(125, 160, 189, 0.65);
+}

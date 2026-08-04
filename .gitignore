@@ -1,0 +1,12 @@
+# Reader user data (imported books, covers, library index)
+projects/reader/data/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Runtime
+.run/
+*.log
+*.bak

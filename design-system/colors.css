@@ -1,0 +1,233 @@
+/* ============================================================
+   Dot Design System — Colors
+   Light-first, warm-neutral, calm-professional.
+   Inspired by Radix semantic scales + Notion/Linear/Vercel
+   warm off-whites. Designed for all-day PM/Founder use.
+
+   - :root                = light (default)
+   - [data-theme="dark"]  = dark (opt-in)
+   - [data-theme="light"] = explicit light alias
+   ============================================================ */
+
+:root {
+  /* =========================================================
+     BRAND — Soft azure blue. Calm, modern, inviting; the
+     friendliness of a sky blue without going corporate/
+     enterprise-dashboard. Slightly desaturated + a cyan lean
+     vs. pure indigo so it reads warmer on light canvases.
+     Full scale so tints/hovers/actives stay perceptually even.
+     AA: white-on-primary ≈ 4.9:1.
+     ========================================================= */
+  --dot-primary:         #3f6ec8;  /* soft azure — buttons, links, focus */
+  --dot-primary-hover:   #4d7bd6;  /* +lighten */
+  --dot-primary-active:  #3762b6;  /* darken, used on :active */
+  --dot-primary-press:   #2e54a3;
+  --dot-primary-subtle:  rgba(63, 110, 200, 0.08);  /* tinted bg, hover row */
+  --dot-primary-subtle-2: rgba(63, 110, 200, 0.14); /* selected/active row */
+  --dot-primary-on:      #ffffff;  /* text on filled primary */
+  --dot-primary-fg:      #3f6ec8;  /* primary-tinted text on light bg */
+
+  /* =========================================================
+     NEUTRAL SCALE (light) — warm-tinted grays (W series).
+     Warm neutrals fatigue the eye less than cool blue-grays
+     over an 8-hour session. Never pure #000 / #fff.
+     ========================================================= */
+  --dot-gray-1: #1f2024;   /* (alias text-primary) strongest text      */
+  --dot-gray-2: #5c5e66;   /* (alias text-secondary) helper / meta     */
+  --dot-gray-3: #e7e7ea;   /* (alias border) hairline borders          */
+  --dot-gray-4: #f4f4f3;   /* (alias fill) muted surface fill          */
+
+  /* Extended semantic neutrals (new) */
+  --dot-text-primary:    #1f2024;
+  --dot-text-secondary:  #5c5e66;
+  --dot-text-tertiary:   #8b8d96;
+  --dot-text-disabled:   #b4b6bd;
+  --dot-text-on-primary: #ffffff;
+
+  --dot-border:         #e7e7ea;   /* default hairline          */
+  --dot-border-strong:  #d4d4d8;   /* inputs / focused outlines */
+  --dot-border-subtle:  #efeeec;   /* very faint separators     */
+
+  --dot-bg:          #fbfbfa;      /* app canvas — warm off-white */
+  --dot-bg-elevated: #ffffff;      /* cards, popovers, modals     */
+  --dot-bg-surface:  #f4f4f3;      /* hover fills, subtle chips   */
+  --dot-bg-sunken:   #eeedec;      /* inset / kanban gutters      */
+  --dot-bg-overlay:  rgba(31, 32, 36, 0.40); /* modal scrim       */
+
+  /* =========================================================
+     STATUS — semantic, with paired fg + soft tinted bg.
+     Chromatic restraint: status hues are DESATURATED so the
+     primary blue is the only color that glows on screen.
+     Only danger keeps enough saturation to be findable.
+     Tags never fill with hue — only the .dot-tag__dot carries
+     color. See dark override below for dark fg variants.
+     ========================================================= */
+  --dot-status-done:        #6B8F7E;  /* muted sage green — whispers */
+  --dot-status-done-bg:     rgba(107, 143, 126, 0.12);
+  --dot-status-done-fg:     #5C7E6E;
+
+  --dot-status-progress:    #A08860;  /* muted amber/tan */
+  --dot-status-progress-bg: rgba(160, 136, 96, 0.14);
+  --dot-status-progress-fg: #8A7452;
+
+  --dot-status-todo:        #6b7280;  /* gray-500 */
+  --dot-status-todo-bg:     rgba(107, 114, 128, 0.12);
+  --dot-status-todo-fg:     #52565e;
+
+  --dot-status-agent:       #8B7FA8;  /* muted violet */
+  --dot-status-agent-bg:    rgba(139, 127, 168, 0.14);
+  --dot-status-agent-fg:    #766A92;
+
+  --dot-danger:        #dc2626;  /* red-600 — kept saturated, the one alarm color */
+  --dot-danger-hover:  #e03a3a;
+  --dot-danger-active: #be2525;
+  --dot-danger-bg:     rgba(220, 38, 38, 0.10);
+  --dot-danger-fg:     #c01f1f;
+  --dot-danger-on:     #ffffff;
+
+  --dot-info:        #6A7FA0;  /* desaturated slate blue (won't fight primary) */
+  --dot-info-bg:     rgba(106, 127, 160, 0.12);
+  --dot-info-fg:     #566C8C;
+
+  --dot-warning:        #A08860;  /* same muted amber as progress */
+  --dot-warning-bg:     rgba(160, 136, 96, 0.14);
+
+  --dot-success:        #6B8F7E;  /* same muted sage as done */
+  --dot-success-bg:     rgba(107, 143, 126, 0.12);
+
+  /* =========================================================
+     ELEVATION — layered ambient shadows (Vercel-style).
+     Two-stop shadows read softer than single blobs.
+     ========================================================= */
+  --dot-shadow-xs: 0 1px 2px rgba(17, 17, 26, 0.04);
+  --dot-shadow-sm: 0 1px 2px rgba(17, 17, 26, 0.04),
+                   0 1px 3px rgba(17, 17, 26, 0.06);
+  --dot-shadow-md: 0 2px 4px rgba(17, 17, 26, 0.04),
+                   0 4px 12px rgba(17, 17, 26, 0.08);
+  --dot-shadow-lg: 0 4px 8px rgba(17, 17, 26, 0.06),
+                   0 12px 32px rgba(17, 17, 26, 0.10);
+  --dot-shadow-xl: 0 8px 16px rgba(17, 17, 26, 0.08),
+                   0 24px 48px rgba(17, 17, 26, 0.14);
+  --dot-shadow-focus: 0 0 0 3px rgba(63, 110, 200, 0.20);
+
+  /* =========================================================
+     RADII — slightly larger top end for a softer, modern feel.
+     ========================================================= */
+  --dot-radius-xs:   4px;
+  --dot-radius-sm:   6px;
+  --dot-radius-md:   8px;
+  --dot-radius-lg:   12px;
+  --dot-radius-xl:   16px;
+  --dot-radius-pill: 9999px;
+
+  /* =========================================================
+     FOCUS RING — offset ring, not a glow blob.
+     ========================================================= */
+  --dot-focus-ring: 0 0 0 2px var(--dot-bg),
+                    0 0 0 4px rgba(63, 110, 200, 0.55);
+
+  /* =========================================================
+     MOTION
+     ========================================================= */
+  --dot-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dot-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dot-dur-fast: 120ms;
+  --dot-dur: 160ms;
+  --dot-dur-slow: 240ms;
+}
+
+/* ============================================================
+   Explicit light alias (so [data-theme="light"] always works
+   even if :root defaults ever change).
+   ============================================================ */
+:root[data-theme="light"],
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* ============================================================
+   DARK THEME — warm near-black, not pure #000.
+   Backgrounds carry a faint warm cast so blacks don't feel
+   harsh/cold. Text is off-white. Status fg brightens for AA
+   on dark surfaces.
+   ============================================================ */
+:root[data-theme="dark"],
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --dot-primary:         #4f70d2;  /* soft azure, brighter on dark */
+  --dot-primary-hover:   #5f7edd;
+  --dot-primary-active:  #4466c0;
+  --dot-primary-press:   #3b5ab0;
+  --dot-primary-subtle:  rgba(79, 112, 210, 0.16);
+  --dot-primary-subtle-2: rgba(79, 112, 210, 0.24);
+  --dot-primary-on:      #ffffff;
+  --dot-primary-fg:      #a8bfea;
+
+  --dot-gray-1: #e9e9ec;
+  --dot-gray-2: #9a9ca3;
+  --dot-gray-3: #2a2a2e;
+  --dot-gray-4: #26262b;
+
+  --dot-text-primary:    #e9e9ec;
+  --dot-text-secondary:  #9a9ca3;
+  --dot-text-tertiary:   #6a6c73;
+  --dot-text-disabled:   #4a4c52;
+  --dot-text-on-primary: #ffffff;
+
+  --dot-border:         #2a2a2e;
+  --dot-border-strong:  #3a3a40;
+  --dot-border-subtle:  #222226;
+
+  --dot-bg:          #161617;   /* warm near-black canvas */
+  --dot-bg-elevated: #1d1d1f;   /* cards / popovers        */
+  --dot-bg-surface:  #26262b;   /* hover fills             */
+  --dot-bg-sunken:   #101012;   /* gutters / inset         */
+  --dot-bg-overlay:  rgba(0, 0, 0, 0.55);
+
+  --dot-status-done:        #8FB5A2;  /* muted sage, brightened for dark AA */
+  --dot-status-done-bg:     rgba(143, 181, 162, 0.16);
+  --dot-status-done-fg:     #8FB5A2;
+
+  --dot-status-progress:    #C2A878;  /* muted amber, brightened */
+  --dot-status-progress-bg: rgba(194, 168, 120, 0.16);
+  --dot-status-progress-fg: #C2A878;
+
+  --dot-status-todo:        #9ca3af;
+  --dot-status-todo-bg:     rgba(156, 163, 175, 0.14);
+  --dot-status-todo-fg:     #9ca3af;
+
+  --dot-status-agent:       #A89BC0;  /* muted violet, brightened */
+  --dot-status-agent-bg:    rgba(168, 155, 192, 0.16);
+  --dot-status-agent-fg:    #A89BC0;
+
+  --dot-danger:        #f87171;
+  --dot-danger-hover:  #f98a8a;
+  --dot-danger-active: #ef5e5e;
+  --dot-danger-bg:     rgba(248, 113, 113, 0.14);
+  --dot-danger-fg:     #f87171;
+  --dot-danger-on:     #1d1d1f;
+
+  --dot-info:        #8A9CB8;  /* desaturated slate blue */
+  --dot-info-bg:     rgba(138, 156, 184, 0.16);
+  --dot-info-fg:     #8A9CB8;
+
+  --dot-warning:        #C2A878;  /* muted amber */
+  --dot-warning-bg:     rgba(194, 168, 120, 0.16);
+  --dot-success:        #8FB5A2;  /* muted sage */
+  --dot-success-bg:     rgba(143, 181, 162, 0.16);
+
+  --dot-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.40);
+  --dot-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40),
+                   0 1px 3px rgba(0, 0, 0, 0.50);
+  --dot-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.45),
+                   0 6px 16px rgba(0, 0, 0, 0.55);
+  --dot-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.50),
+                   0 16px 40px rgba(0, 0, 0, 0.60);
+  --dot-shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.55),
+                   0 24px 56px rgba(0, 0, 0, 0.65);
+  --dot-shadow-focus: 0 0 0 3px rgba(79, 112, 210, 0.35);
+
+  --dot-focus-ring: 0 0 0 2px var(--dot-bg),
+                    0 0 0 4px rgba(79, 112, 210, 0.65);
+}

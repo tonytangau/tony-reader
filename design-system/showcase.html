@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dot Design System — Showcase</title>
+  <link rel="stylesheet" href="colors.css" />
+  <link rel="stylesheet" href="typography.css" />
+  <link rel="stylesheet" href="components.css" />
+  <style>
+    /* ---- Showcase layout (not part of the design system) ---- */
+    .showcase {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: var(--dot-space-12) var(--dot-space-8) var(--dot-space-16);
+    }
+    .showcase__topbar {
+      position: sticky;
+      top: 0;
+      z-index: var(--dot-z-sticky);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--dot-space-4);
+      padding: var(--dot-space-3) 0;
+      margin: 0 calc(-1 * var(--dot-space-8)) var(--dot-space-8);
+      padding-left: var(--dot-space-8);
+      padding-right: var(--dot-space-8);
+      background: color-mix(in srgb, var(--dot-bg) 88%, transparent);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--dot-border-subtle);
+    }
+    .showcase__brand {
+      display: flex;
+      align-items: center;
+      gap: var(--dot-space-3);
+    }
+    .showcase__logo {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--dot-radius-sm);
+      background: var(--dot-primary);
+      color: var(--dot-primary-on);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: var(--dot-fw-bold);
+      font-size: var(--dot-fs-small);
+      box-shadow: var(--dot-shadow-xs);
+    }
+    .showcase__title { font-size: var(--dot-fs-h2); }
+    .showcase__sub {
+      color: var(--dot-text-secondary);
+      font-size: var(--dot-fs-small);
+      margin: var(--dot-space-1) 0 0;
+    }
+
+    .section { margin-bottom: var(--dot-space-16); }
+    .section__head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--dot-space-3);
+      margin-bottom: var(--dot-space-4);
+    }
+    .section__label {
+      font-size: var(--dot-fs-micro);
+      letter-spacing: var(--dot-ls-wider);
+      text-transform: uppercase;
+      color: var(--dot-text-tertiary);
+      font-weight: var(--dot-fw-semibold);
+      padding-bottom: var(--dot-space-2);
+      border-bottom: 1px solid var(--dot-border);
+      flex: 1;
+    }
+    .section__hint {
+      font-size: var(--dot-fs-micro);
+      color: var(--dot-text-tertiary);
+      padding-bottom: var(--dot-space-2);
+    }
+
+    /* Light panel wrapping each group */
+    .panel {
+      background: var(--dot-bg-elevated);
+      border: 1px solid var(--dot-border);
+      border-radius: var(--dot-radius-lg);
+      box-shadow: var(--dot-shadow-sm);
+      padding: var(--dot-space-6);
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--dot-space-3);
+      margin-bottom: var(--dot-space-4);
+    }
+    .row:last-child { margin-bottom: 0; }
+    .row__label {
+      width: 96px;
+      flex-shrink: 0;
+      font-size: var(--dot-fs-micro);
+      letter-spacing: var(--dot-ls-wide);
+      text-transform: uppercase;
+      color: var(--dot-text-tertiary);
+      font-weight: var(--dot-fw-medium);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--dot-space-4);
+      max-width: 680px;
+    }
+    .field { display: flex; flex-direction: column; gap: var(--dot-space-1); }
+    .field__label {
+      font-size: var(--dot-fs-micro);
+      font-weight: var(--dot-fw-medium);
+      letter-spacing: var(--dot-ls-wide);
+      color: var(--dot-text-secondary);
+    }
+    .field__error {
+      font-size: var(--dot-fs-micro);
+      color: var(--dot-danger-fg);
+      display: flex;
+      align-items: center;
+      gap: var(--dot-space-1);
+    }
+    .field__hint {
+      font-size: var(--dot-fs-micro);
+      color: var(--dot-text-tertiary);
+    }
+
+    .swatch-row { display: flex; flex-wrap: wrap; gap: var(--dot-space-3); }
+    .swatch { display: flex; flex-direction: column; gap: var(--dot-space-1); width: 124px; }
+    .swatch__chip {
+      height: 48px;
+      border-radius: var(--dot-radius-md);
+      border: 1px solid var(--dot-border);
+    }
+    .swatch__name {
+      font-size: var(--dot-fs-micro);
+      color: var(--dot-text-tertiary);
+      letter-spacing: var(--dot-ls-wide);
+    }
+
+    .kanban-wrap {
+      border: 1px solid var(--dot-border);
+      border-radius: var(--dot-radius-lg);
+      background: var(--dot-bg-elevated);
+      overflow: hidden;
+    }
+    .kanban-wrap .dot-board { padding: var(--dot-space-6); }
+
+    .menu-demo {
+      position: relative;
+      display: inline-flex;
+    }
+    .menu-demo .dot-menu {
+      position: absolute;
+      top: calc(100% + var(--dot-space-1));
+      left: 0;
+    }
+
+    /* Tooltip demo wrapper */
+    .tt {
+      position: relative;
+      display: inline-flex;
+    }
+    .tt .dot-tooltip {
+      position: absolute;
+      bottom: calc(100% + var(--dot-space-2));
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity var(--dot-dur) var(--dot-ease);
+    }
+    .tt:hover .dot-tooltip,
+    .tt:focus-within .dot-tooltip { opacity: 1; }
+
+    /* Two-column surface demo */
+    .surface-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--dot-space-4);
+    }
+
+    .skeleton-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--dot-space-2);
+      padding: var(--dot-space-4);
+      background: var(--dot-bg-elevated);
+      border: 1px solid var(--dot-border);
+      border-radius: var(--dot-radius-md);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--dot-space-2);
+      padding: var(--dot-space-2) var(--dot-space-3);
+      background: var(--dot-bg-sunken);
+      border-radius: var(--dot-radius-md);
+    }
+
+    .stack { display: flex; flex-direction: column; gap: var(--dot-space-3); max-width: 680px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--dot-space-6); }
+    @media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .badge-in-context {
+      position: relative;
+      display: inline-flex;
+    }
+    .badge-in-context .dot-badge {
+      position: absolute;
+      top: -6px;
+      right: -8px;
+    }
+
+    code.inline {
+      padding: 1px 5px;
+      border-radius: var(--dot-radius-xs);
+      background: var(--dot-bg-surface);
+      border: 1px solid var(--dot-border-subtle);
+      font-family: var(--dot-font-mono);
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+  <div class="showcase">
+
+    <!-- ===================== Top bar ===================== -->
+    <div class="showcase__topbar">
+      <div class="showcase__brand">
+        <span class="showcase__logo">D</span>
+        <div>
+          <div class="showcase__title">Dot Design System</div>
+          <div class="showcase__sub">v0.1 · Linear-inspired · light-first</div>
+        </div>
+      </div>
+      <div class="dot-row" style="gap: var(--dot-space-2);">
+        <a href="#components" class="dot-btn dot-btn--ghost dot-btn--sm">Components</a>
+        <button id="themeToggle" class="dot-btn dot-btn--outline dot-btn--sm" type="button">
+          <span id="themeToggleIcon">🌙</span> <span id="themeToggleLabel">Dark</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===================== Colors ===================== -->
+    <section class="section">
+      <div class="section__head">
+        <h2 class="section__label">Colors</h2>
+        <span class="section__hint">semantic tokens</span>
+      </div>
+      <div class="panel">
+        <div class="row" style="margin-bottom: var(--dot-space-4);">
+          <span class="row__label">Brand</span>
+          <div class="swatch-row">
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-primary)"></div><span class="swatch__name">Primary</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-primary-hover)"></div><span class="swatch__name">Hover</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-primary-active)"></div><span class="swatch__name">Active</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-primary-subtle); border-color:var(--dot-border)"></div><span class="swatch__name">Subtle</span></div>
+          </div>
+        </div>
+        <div class="row" style="margin-bottom: var(--dot-space-4);">
+          <span class="row__label">Neutral</span>
+          <div class="swatch-row">
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-bg)"></div><span class="swatch__name">BG</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-bg-elevated)"></div><span class="swatch__name">Elevated</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-bg-surface)"></div><span class="swatch__name">Surface</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-bg-sunken)"></div><span class="swatch__name">Sunken</span></div>
+          </div>
+        </div>
+        <div class="row">
+          <span class="row__label">Status</span>
+          <div class="swatch-row">
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-status-done)"></div><span class="swatch__name">Done</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-status-progress)"></div><span class="swatch__name">Progress</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-status-todo)"></div><span class="swatch__name">Todo</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-status-agent)"></div><span class="swatch__name">Agent</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-danger)"></div><span class="swatch__name">Danger</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--dot-info)"></div><span class="swatch__name">Info</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Buttons ===================== -->
+    <section class="section" id="components">
+      <div class="section__head">
+        <h2 class="section__label">Buttons</h2>
+        <span class="section__hint">variants · sizes · states</span>
+      </div>
+      <div class="panel">
+        <div class="row">
+          <span class="row__label">Variants</span>
+          <button class="dot-btn dot-btn--primary">Primary</button>
+          <button class="dot-btn dot-btn--secondary">Secondary</button>
+          <button class="dot-btn dot-btn--subtle">Subtle</button>
+          <button class="dot-btn dot-btn--outline">Outline</button>
+          <button class="dot-btn dot-btn--ghost">Ghost</button>
+          <button class="dot-btn dot-btn--danger">Danger</button>
+        </div>
+
+        <div class="row">
+          <span class="row__label">Small</span>
+          <button class="dot-btn dot-btn--primary dot-btn--sm">Primary</button>
+          <button class="dot-btn dot-btn--secondary dot-btn--sm">Secondary</button>
+          <button class="dot-btn dot-btn--subtle dot-btn--sm">Subtle</button>
+          <button class="dot-btn dot-btn--ghost dot-btn--sm">Ghost</button>
+        </div>
+
+        <div class="row">
+          <span class="row__label">Large</span>
+          <button class="dot-btn dot-btn--primary dot-btn--lg">＋ New task</button>
+          <button class="dot-btn dot-btn--secondary dot-btn--lg">Export</button>
+        </div>
+
+        <div class="row">
+          <span class="row__label">With icon</span>
+          <button class="dot-btn dot-btn--primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            Create card
+          </button>
+          <button class="dot-btn dot-btn--secondary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Export
+          </button>
+          <button class="dot-btn dot-btn--ghost">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+            Share
+          </button>
+        </div>
+
+        <div class="row">
+          <span class="row__label">Icon button</span>
+          <button class="dot-btn dot-btn--secondary dot-btn--icon" aria-label="Search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </button>
+          <button class="dot-btn dot-btn--ghost dot-btn--icon" aria-label="Settings">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+          <button class="dot-btn dot-btn--danger dot-btn--icon" aria-label="Delete">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+          <button class="dot-btn dot-btn--secondary dot-btn--icon dot-btn--sm" aria-label="More">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+          </button>
+          <button class="dot-btn dot-btn--primary dot-btn--icon dot-btn--lg" aria-label="Add">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+
+        <div class="row">
+          <span class="row__label">Disabled</span>
+          <button class="dot-btn dot-btn--primary" disabled>Primary</button>
+          <button class="dot-btn dot-btn--secondary" disabled>Secondary</button>
+          <button class="dot-btn dot-btn--danger" disabled>Danger</button>
+        </div>
+
+        <div class="row" style="margin-bottom:0;">
+          <span class="row__label">In context</span>
+          <div class="toolbar">
+            <button class="dot-btn dot-btn--subtle dot-btn--sm">All</button>
+            <button class="dot-btn dot-btn--subtle dot-btn--sm">Active</button>
+            <button class="dot-btn dot-btn--subtle dot-btn--sm">Done</button>
+            <span style="flex:1;"></span>
+            <button class="dot-btn dot-btn--ghost dot-btn--icon dot-btn--sm" aria-label="Filter">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+            </button>
+            <button class="dot-btn dot-btn--primary dot-btn--sm">＋ New</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Tags & Badges ===================== -->
+    <section class="section">
+      <div class="section__head">
+        <h2 class="section__label">Tags &amp; Badges</h2>
+        <span class="section__hint">all status variants</span>
+      </div>
+      <div class="panel">
+        <div class="row">
+          <span class="row__label">Status tags</span>
+          <span class="dot-tag dot-tag--done"><span class="dot-tag__dot"></span>Done</span>
+          <span class="dot-tag dot-tag--progress"><span class="dot-tag__dot"></span>In Progress</span>
+          <span class="dot-tag dot-tag--todo"><span class="dot-tag__dot"></span>To Do</span>
+          <span class="dot-tag dot-tag--agent"><span class="dot-tag__dot"></span>Agent</span>
+          <span class="dot-tag dot-tag--danger"><span class="dot-tag__dot"></span>Blocked</span>
+          <span class="dot-tag dot-tag--info"><span class="dot-tag__dot"></span>Info</span>
+        </div>
+
+        <div class="row">
+          <span class="row__label">Neutral</span>
+          <span class="dot-tag dot-tag--neutral">design</span>
+          <span class="dot-tag dot-tag--neutral">backend</span>
+          <span class="dot-tag dot-tag--neutral">ui</span>
+          <span class="dot-tag dot-tag--outline">outline</span>
+          <span class="dot-tag dot-tag--outline">v0.1</span>
+        </div>
+
+        <div class="row">
+          <span class="row__label">Badges</span>
+          <span class="dot-badge">3</span>
+          <span class="dot-badge">99+</span>
+          <span class="dot-badge dot-badge--neutral">12</span>
+          <span class="dot-badge dot-badge--danger">5</span>
+          <span style="width:8px;"></span>
+          <span class="badge-in-context">
+            <button class="dot-btn dot-btn--secondary">Inbox</button>
+            <span class="dot-badge">7</span>
+          </span>
+        </div>
+
+        <div class="row" style="margin-bottom:0;">
+          <span class="row__label">On card</span>
+          <div class="dot-card" style="max-width:340px;">
+            <span class="dot-card__id">DOT-004</span>
+            <span class="dot-card__title">Implement agent task runner</span>
+            <div class="dot-card__meta">
+              <div class="dot-card__tags">
+                <span class="dot-tag dot-tag--agent"><span class="dot-tag__dot"></span>Agent</span>
+                <span class="dot-tag dot-tag--neutral">core</span>
+                <span class="dot-tag dot-tag--danger"><span class="dot-tag__dot"></span>Blocked</span>
+              </div>
+              <span class="dot-badge dot-badge--neutral">v0.2</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Avatars ===================== -->
+    <section class="section">
+      <div class="section__head">
+        <h2 class="section__label">Avatars</h2>
+        <span class="section__hint">sizes · groups · agent</span>
+      </div>
+      <div class="panel">
+        <div class="row">
+          <span class="row__label">Sizes</span>
+          <span class="dot-avatar dot-avatar--sm">TK</span>
+          <span class="dot-avatar">TK</span>
+          <span class="dot-avatar dot-avatar--lg">TK</span>
+          <span style="width:24px;"></span>
+          <span class="dot-avatar dot-avatar--sm dot-avatar--agent">A</span>
+          <span class="dot-avatar dot-avatar--agent">A</span>
+          <span class="dot-avatar dot-avatar--lg dot-avatar--agent">A</span>
+        </div>
+
+        <div class="row">
+          <span class="row__label">Group</span>
+          <span class="dot-avatar-group">
+            <span class="dot-avatar">TK</span>
+            <span class="dot-avatar">JD</span>
+            <span class="dot-avatar dot-avatar--agent">A</span>
+            <span class="dot-avatar">+3</span>
+          </span>
+          <span style="width:24px;"></span>
+          <span class="dot-avatar-group">
+            <span class="dot-avatar dot-avatar--sm">TK</span>
+            <span class="dot-avatar dot-avatar--sm">JD</span>
+            <span class="dot-avatar dot-avatar--sm dot-avatar--agent">A</span>
+          </span>
+        </div>
+
+        <div class="row" style="margin-bottom:0;">
+          <span class="row__label">In context</span>
+          <div class="dot-card" style="max-width:340px;">
+            <span class="dot-card__id">DOT-005</span>
+            <span class="dot-card__title">Build command palette search</span>
+            <div class="dot-card__footer">
+              <div class="dot-card__tags">
+                <span class="dot-tag dot-tag--progress"><span class="dot-tag__dot"></span>In Progress</span>
+              </div>
+              <span class="dot-avatar-group">
+                <span class="dot-avatar dot-avatar--sm">TK</span>
+                <span class="dot-avatar dot-avatar--sm dot-avatar--agent">A</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Inputs ===================== -->
+    <section class="section">
+      <div class="section__head">
+        <h2 class="section__label">Inputs</h2>
+        <span class="section__hint">sizes · error · search · select</span>
+      </div>
+      <div class="panel">
+        <div class="stack">
+          <div class="dot-search">
+            <span class="dot-search__icon">⌕</span>
+            <input class="dot-search__input" type="text" placeholder="Search tasks, notes, commands…" />
+            <span class="dot-search__kbd">⌘K</span>
+          </div>
+        </div>
+
+        <hr class="dot-divider dot-divider--subtle" style="margin: var(--dot-space-5) 0;" />
+
+        <div class="field-grid">
+          <div class="field">
+            <label class="field__label">Task title</label>
+            <input class="dot-input" type="text" value="Wire up Brain ↔ Board sync" />
+            <span class="field__hint">Shown on the kanban card.</span>
+          </div>
+          <div class="field">
+            <label class="field__label">Small input</label>
+            <input class="dot-input dot-input--sm" type="text" placeholder="quick filter" />
+            <span class="field__hint">Compact size for toolbars.</span>
+          </div>
+          <div class="field">
+            <label class="field__label">Email</label>
+            <input class="dot-input dot-input--error" type="text" value="tony@dot" />
+            <span class="field__error">⚠ Enter a valid email address.</span>
+          </div>
+          <div class="field">
+            <label class="field__label">Status</label>
+            <select class="dot-select">
+              <option>To Do</option>
+              <option selected>In Progress</option>
+              <option>Done</option>
+              <option>Ready for Agent</option>
+            </select>
+            <span class="field__hint">Drives the connector pipeline.</span>
+          </div>
+        </div>
+
+        <hr class="dot-divider dot-divider--subtle" style="margin: var(--dot-space-5) 0;" />
+
+        <div class="field" style="max-width:680px;">
+          <label class="field__label">Description</label>
+          <textarea class="dot-textarea" placeholder="Write a note or task description…">Multi-line textarea for longer descriptions. The connector reads this and passes it to the coding agent.</textarea>
+          <span class="field__hint">Markdown supported.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Menu / Dropdown ===================== -->
+    <section class="section">
+      <div class="section__head">
+        <h2 class="section__label">Menu / Dropdown</h2>
+        <span class="section__hint">items · separator · active · danger</span>
+      </div>
+      <div class="panel">
+        <div class="grid-2">
+          <!-- Static menu shown open -->
+          <div class="field">
+            <label class="field__label">Status menu (open)</label>
+            <div class="menu-demo" style="height: 220px;">
+              <div class="dot-menu" style="position: static; box-shadow: var(--dot-shadow-sm);">
+                <div class="dot-menu__label">Set status</div>
+                <div class="dot-menu__item">
+                  <span class="dot-tag__dot" style="background: var(--dot-status-todo-fg)"></span>
+                  To Do
+                </div>
+                <div class="dot-menu__item dot-menu__item--active">
+                  <span class="dot-tag__dot" style="background: var(--dot-status-progress-fg)"></span>
+                  In Progress
+                </div>
+                <div class="dot-menu__item">
+                  <span class="dot-tag__dot" style="background: var(--dot-status-agent-fg)"></span>
+                  Ready for Agent
+                </div>
+                <div class="dot-menu__item">
+                  <span class="dot-tag__dot" style="background: var(--dot-status-done-fg)"></span>
+                  Done
+                </div>
+                <div class="dot-menu__sep"></div>
+                <div class="dot-menu__item dot-menu__item--danger">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  Delete card
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive toggle menu -->
+          <div class="field">
+            <label class="field__label">Interactive</label>
+            <div class="menu-demo" style="height: 220px;">
+              <button class="dot-btn dot-btn--secondary" id="menuTrigger" type="button">
+                Sort: Priority
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dot-menu" id="sortMenu" style="display:none;">
+                <div class="dot-menu__label">Sort by</div>
+                <div class="dot-menu__item dot-menu__item--active">Priority</div>
+                <div class="dot-menu__item">Status</div>
+                <div class="dot-menu__item">Assignee</div>
+                <div class="dot-menu__item">Created date</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Tooltip ===================== -->
+    <section class="section">
+      <div class="section__head">
+        <h2 class="section__label">Tooltip</h2>
+        <span class="section__hint">hover to reveal</span>
+      </div>
+      <div class="panel">
+        <div class="row" style="padding-top: var(--dot-space-6); padding-bottom: var(--dot-space-6);">
+          <span class="row__label">Hover targets</span>
+          <span class="tt" tabindex="0">
+            <button class="dot-btn dot-btn--secondary dot-btn--icon" aria-label="Archive">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4"/></svg>
+            </button>
+            <span class="dot-tooltip">Archive this card</span>
+          </span>
+          <span class="tt" tabindex="0">
+            <span class="dot-avatar dot-avatar--agent">A</span>
+            <span class="dot-tooltip">Pi + GLM 5.2 · coding agent</span>
+          </span>
+          <span class="tt" tabindex="0">
+            <span class="dot-tag dot-tag--danger"><span class="dot-tag__dot"></span>Blocked</span>
+            <span class="dot-tooltip">Waiting on spec review</span>
+          </span>
+          <span class="tt" tabindex="0">
+            <button class="dot-btn dot-btn--ghost">Hover me</button>
+            <span class="dot-tooltip">Tooltips appear on hover or focus</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Skeleton ===================== -->
+    <section class="section">
+      <div class="section__head">
+        <h2 class="section__label">Skeleton Loader</h2>
+        <span class="section__hint">shimmer animation · loading state</span>
+      </div>
+      <div class="panel">
+        <div class="row" style="margin-bottom: var(--dot-space-5);">
+          <span class="row__label">Lines</span>
+          <span class="dot-skeleton" style="width:180px; height:12px;"></span>
+          <span class="dot-skeleton" style="width:120px; height:12px;"></span>
+          <span class="dot-skeleton" style="width:240px; height:12px;"></span>
+        </div>
+        <div class="row" style="margin-bottom:0;">
+          <span class="row__label">Loading card</span>
+          <div class="skeleton-card" style="max-width:340px;">
+            <div class="dot-row" style="gap: var(--dot-space-2);">
+              <span class="dot-skeleton" style="width:60px; height:12px;"></span>
+              <span style="flex:1;"></span>
+              <span class="dot-skeleton" style="width:40px; height:18px; border-radius: var(--dot-radius-pill);"></span>
+            </div>
+            <span class="dot-skeleton" style="width:90%; height:16px;"></span>
+            <span class="dot-skeleton" style="width:60%; height:16px;"></span>
+            <div class="dot-row" style="gap: var(--dot-space-2); margin-top: var(--dot-space-1);">
+              <span class="dot-skeleton" style="width:70px; height:20px; border-radius: var(--dot-radius-pill);"></span>
+              <span class="dot-skeleton" style="width:50px; height:20px; border-radius: var(--dot-radius-pill);"></span>
+              <span style="flex:1;"></span>
+              <span class="dot-skeleton" style="width:24px; height:24px; border-radius:50%;"></span>
+            </div>
+          </div>
+          <span style="width:24px;"></span>
+          <div class="skeleton-card" style="max-width:340px;">
+            <div class="dot-row" style="gap: var(--dot-space-2);">
+              <span class="dot-skeleton" style="width:60px; height:12px;"></span>
+              <span style="flex:1;"></span>
+              <span class="dot-skeleton" style="width:40px; height:18px; border-radius: var(--dot-radius-pill);"></span>
+            </div>
+            <span class="dot-skeleton" style="width:80%; height:16px;"></span>
+            <span class="dot-skeleton" style="width:55%; height:16px;"></span>
+            <div class="dot-row" style="gap: var(--dot-space-2); margin-top: var(--dot-space-1);">
+              <span class="dot-skeleton" style="width:64px; height:20px; border-radius: var(--dot-radius-pill);"></span>
+              <span style="flex:1;"></span>
+              <span class="dot-skeleton" style="width:24px; height:24px; border-radius:50%;"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Surfaces ===================== -->
+    <section class="section">
+      <div class="section__head">
+        <h2 class="section__label">Surfaces &amp; Panels</h2>
+        <span class="section__hint">elevated · inset</span>
+      </div>
+      <div class="panel">
+        <div class="surface-grid">
+          <!-- Elevated surface (realistic detail panel) -->
+          <div class="dot-surface" style="padding: var(--dot-space-4);">
+            <div class="dot-row" style="justify-content: space-between; margin-bottom: var(--dot-space-3);">
+              <h3 style="font-size: var(--dot-fs-h3);">Task detail</h3>
+              <div class="dot-row" style="gap: var(--dot-space-1);">
+                <button class="dot-btn dot-btn--ghost dot-btn--icon dot-btn--sm" aria-label="Edit">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="dot-btn dot-btn--ghost dot-btn--icon dot-btn--sm" aria-label="Close">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="dot-card__id" style="margin-bottom: var(--dot-space-1);">DOT-004</div>
+            <div style="font-size: var(--dot-fs-body); font-weight: var(--dot-fw-medium); margin-bottom: var(--dot-space-2);">Implement agent task runner</div>
+            <p class="dot-card__desc" style="margin-bottom: var(--dot-space-3);">Connector detects ready-for-agent cards, reads the linked Brain spec, and dispatches to Pi.</p>
+            <hr class="dot-divider dot-divider--subtle" style="margin: var(--dot-space-3) 0;" />
+            <div class="dot-row" style="justify-content: space-between;">
+              <span class="dot-tag dot-tag--agent"><span class="dot-tag__dot"></span>Agent</span>
+              <span class="dot-avatar-group">
+                <span class="dot-avatar dot-avatar--sm">TK</span>
+                <span class="dot-avatar dot-avatar--sm dot-avatar--agent">A</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Inset surface -->
+          <div class="dot-surface dot-surface--inset" style="padding: var(--dot-space-4);">
+            <div class="dot-text-eyebrow" style="margin-bottom: var(--dot-space-2);">Agent log</div>
+            <div class="dot-stack" style="gap: var(--dot-space-2);">
+              <div class="dot-row" style="gap: var(--dot-space-2);">
+                <span class="dot-tag__dot" style="background: var(--dot-status-done-fg);"></span>
+                <span style="font-size: var(--dot-fs-small); color: var(--dot-text-secondary);">Read <code class="inline">[[dot/spec]]</code></span>
+              </div>
+              <div class="dot-row" style="gap: var(--dot-space-2);">
+                <span class="dot-tag__dot" style="background: var(--dot-status-done-fg);"></span>
+                <span style="font-size: var(--dot-fs-small); color: var(--dot-text-secondary);">Generated 3 files</span>
+              </div>
+              <div class="dot-row" style="gap: var(--dot-space-2);">
+                <span class="dot-tag__dot" style="background: var(--dot-status-progress-fg);"></span>
+                <span style="font-size: var(--dot-fs-small); color: var(--dot-text-secondary);">Running tests…</span>
+                <span class="dot-skeleton" style="flex:1; height:8px;"></span>
+              </div>
+            </div>
+            <hr class="dot-divider dot-divider--subtle" style="margin: var(--dot-space-3) 0;" />
+            <div class="dot-row" style="gap: var(--dot-space-2);">
+              <button class="dot-btn dot-btn--secondary dot-btn--sm">View log</button>
+              <button class="dot-btn dot-btn--ghost dot-btn--sm">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Kanban ===================== -->
+    <section class="section">
+      <div class="section__head">
+        <h2 class="section__label">Kanban Board</h2>
+        <span class="section__hint">columns · cards · drag-ready</span>
+      </div>
+      <div class="kanban-wrap">
+        <div class="dot-board">
+
+          <!-- Column: To Do -->
+          <div class="dot-column">
+            <div class="dot-column__header">
+              <span class="dot-column__title">
+                <span class="dot-tag dot-tag--todo"><span class="dot-tag__dot"></span>To Do</span>
+              </span>
+              <span class="dot-column__count">3</span>
+            </div>
+            <div class="dot-column__body">
+              <div class="dot-card">
+                <span class="dot-card__id">DOT-001</span>
+                <span class="dot-card__title">Define project ontology schema</span>
+                <div class="dot-card__meta">
+                  <div class="dot-card__tags">
+                    <span class="dot-tag dot-tag--neutral">design</span>
+                  </div>
+                  <span class="dot-avatar dot-avatar--sm">TK</span>
+                </div>
+              </div>
+              <div class="dot-card dot-card--selected">
+                <span class="dot-card__id">DOT-002</span>
+                <span class="dot-card__title">Wire up Brain ↔ Board sync</span>
+                <div class="dot-card__meta">
+                  <div class="dot-card__tags">
+                    <span class="dot-tag dot-tag--neutral">backend</span>
+                  </div>
+                  <span class="dot-avatar dot-avatar--sm dot-avatar--agent">A</span>
+                </div>
+              </div>
+              <div class="dot-card">
+                <span class="dot-card__id">DOT-003</span>
+                <span class="dot-card__title">Scaffold TUI layout grid</span>
+                <div class="dot-card__meta">
+                  <div class="dot-card__tags">
+                    <span class="dot-tag dot-tag--neutral">ui</span>
+                  </div>
+                  <span class="dot-avatar dot-avatar--sm">TK</span>
+                </div>
+              </div>
+            </div>
+            <button class="dot-btn dot-btn--ghost dot-btn--sm dot-column__add">＋ Add card</button>
+          </div>
+
+          <!-- Column: In Progress -->
+          <div class="dot-column">
+            <div class="dot-column__header">
+              <span class="dot-column__title">
+                <span class="dot-tag dot-tag--progress"><span class="dot-tag__dot"></span>In Progress</span>
+              </span>
+              <span class="dot-column__count">2</span>
+            </div>
+            <div class="dot-column__body">
+              <div class="dot-card">
+                <span class="dot-card__id">DOT-004</span>
+                <span class="dot-card__title">Implement agent task runner</span>
+                <div class="dot-card__meta">
+                  <div class="dot-card__tags">
+                    <span class="dot-tag dot-tag--agent"><span class="dot-tag__dot"></span>Agent</span>
+                    <span class="dot-tag dot-tag--neutral">core</span>
+                  </div>
+                  <span class="dot-avatar dot-avatar--sm dot-avatar--agent">A</span>
+                </div>
+              </div>
+              <div class="dot-card">
+                <span class="dot-card__id">DOT-005</span>
+                <span class="dot-card__title">Build command palette search</span>
+                <div class="dot-card__meta">
+                  <div class="dot-card__tags">
+                    <span class="dot-tag dot-tag--neutral">ui</span>
+                  </div>
+                  <span class="dot-avatar dot-avatar--sm">TK</span>
+                </div>
+              </div>
+            </div>
+            <button class="dot-btn dot-btn--ghost dot-btn--sm dot-column__add">＋ Add card</button>
+          </div>
+
+          <!-- Column: Done -->
+          <div class="dot-column">
+            <div class="dot-column__header">
+              <span class="dot-column__title">
+                <span class="dot-tag dot-tag--done"><span class="dot-tag__dot"></span>Done</span>
+              </span>
+              <span class="dot-column__count">2</span>
+            </div>
+            <div class="dot-column__body">
+              <div class="dot-card">
+                <span class="dot-card__id">DOT-006</span>
+                <span class="dot-card__title">Author design system tokens</span>
+                <div class="dot-card__meta">
+                  <div class="dot-card__tags">
+                    <span class="dot-tag dot-tag--done"><span class="dot-tag__dot"></span>Done</span>
+                  </div>
+                  <span class="dot-avatar dot-avatar--sm">TK</span>
+                </div>
+              </div>
+              <div class="dot-card">
+                <span class="dot-card__id">DOT-007</span>
+                <span class="dot-card__title">Set up CI pipeline</span>
+                <div class="dot-card__meta">
+                  <div class="dot-card__tags">
+                    <span class="dot-tag dot-tag--done"><span class="dot-tag__dot"></span>Done</span>
+                  </div>
+                  <span class="dot-avatar dot-avatar--sm dot-avatar--agent">A</span>
+                </div>
+              </div>
+            </div>
+            <button class="dot-btn dot-btn--ghost dot-btn--sm dot-column__add">＋ Add card</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Divider ===================== -->
+    <section class="section">
+      <div class="section__head">
+        <h2 class="section__label">Divider</h2>
+        <span class="section__hint">default · strong · subtle</span>
+      </div>
+      <div class="panel" style="max-width:680px;">
+        <p class="dot-text-secondary">Content above the divider.</p>
+        <hr class="dot-divider" style="margin: var(--dot-space-3) 0;" />
+        <p class="dot-text-secondary">Default divider between sections.</p>
+        <hr class="dot-divider dot-divider--strong" style="margin: var(--dot-space-3) 0;" />
+        <p class="dot-text-secondary">Strong divider for major breaks.</p>
+        <hr class="dot-divider dot-divider--subtle" style="margin: var(--dot-space-3) 0;" />
+        <p class="dot-text-secondary">Subtle divider for quiet separation.</p>
+      </div>
+    </section>
+
+    <footer style="padding-top: var(--dot-space-8); border-top: 1px solid var(--dot-border);">
+      <div class="dot-row" style="justify-content: space-between;">
+        <span class="dot-text-tertiary" style="font-size: var(--dot-fs-micro);">Dot Design System · production-ready · light + dark</span>
+        <span class="dot-text-tertiary" style="font-size: var(--dot-fs-micro);">Built with Dot, for Dot.</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // ---- Theme toggle ----
+    const root = document.documentElement;
+    const toggle = document.getElementById('themeToggle');
+    const label = document.getElementById('themeToggleLabel');
+    const icon = document.getElementById('themeToggleIcon');
+
+    function setTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      if (theme === 'dark') {
+        label.textContent = 'Light';
+        icon.textContent = '☀️';
+      } else {
+        label.textContent = 'Dark';
+        icon.textContent = '🌙';
+      }
+    }
+    toggle.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      setTheme(next);
+    });
+    setTheme('light');
+
+    // ---- Interactive dropdown ----
+    const trigger = document.getElementById('menuTrigger');
+    const menu = document.getElementById('sortMenu');
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = menu.style.display !== 'none';
+      menu.style.display = open ? 'none' : 'block';
+    });
+    menu.addEventListener('click', (e) => {
+      const item = e.target.closest('.dot-menu__item');
+      if (!item) return;
+      menu.querySelectorAll('.dot-menu__item').forEach(i => i.classList.remove('dot-menu__item--active'));
+      item.classList.add('dot-menu__item--active');
+      trigger.childNodes[0].nodeValue = 'Sort: ' + item.textContent.trim() + ' ';
+      menu.style.display = 'none';
+    });
+    document.addEventListener('click', () => { menu.style.display = 'none'; });
+  </script>
+</body>
+</html>

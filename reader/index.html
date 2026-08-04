@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dot Reader — Library</title>
+  <link rel="stylesheet" href="/design-system/colors.css">
+  <link rel="stylesheet" href="/design-system/typography.css">
+  <link rel="stylesheet" href="/design-system/components.css">
+  <link rel="stylesheet" href="/reader/style.css">
+</head>
+<body class="reader-body">
+
+  <!-- ============================================================
+       Top app bar — brand, search, import
+       ============================================================ -->
+  <header class="reader-appbar">
+    <div class="reader-appbar__brand">
+      <span class="reader-appbar__mark" aria-hidden="true">R</span>
+      <span class="reader-appbar__title">Dot Reader</span>
+    </div>
+
+    <div class="reader-appbar__search">
+      <div class="dot-search">
+        <span class="dot-search__icon" aria-hidden="true">⌕</span>
+        <input class="dot-search__input" id="search-input" type="search"
+               placeholder="Search titles, authors, or text inside books…"
+               autocomplete="off" spellcheck="false"
+               aria-label="Search books by title, author, or full text">
+        <kbd class="dot-search__kbd">/</kbd>
+      </div>
+    </div>
+
+    <div class="reader-appbar__actions">
+      <button class="dot-btn dot-btn--primary dot-btn--lg" id="import-btn"
+              aria-label="Import books">
+        <span aria-hidden="true">＋</span>
+        <span>Import</span>
+      </button>
+      <input type="file" id="import-file" class="reader-file-input"
+             accept=".epub,.pdf,application/epub+zip,application/pdf" multiple
+             aria-hidden="true" tabindex="-1">
+    </div>
+  </header>
+
+  <!-- ============================================================
+       Two-column shell: sidebar (desktop only) + main pane.
+       On mobile the sidebar is hidden and the reading view becomes
+       a fullscreen overlay; on >1200px the sidebar stays visible
+       and the reading view renders inline in the main column.
+       ============================================================ -->
+  <div class="reader-shell" id="reader-shell">
+
+    <aside class="reader-sidebar" id="reader-sidebar" aria-label="Library list">
+      <div class="reader-sidebar__head">
+        <span>Library</span>
+        <span class="reader-sidebar__count" id="sidebar-count"></span>
+      </div>
+      <div class="reader-sidebar__list dot-scroll" id="sidebar-list"
+           aria-live="polite"></div>
+      <div class="reader-sidebar__stats" id="sidebar-stats"></div>
+    </aside>
+
+    <main class="reader-main" id="reader-main">
+
+      <!-- Library mode: status + grid + search results -->
+      <div class="reader-library" id="reader-library">
+
+        <div class="reader-status">
+          <h1 class="reader-status__heading" id="status-heading">Library</h1>
+          <p class="reader-status__meta" id="library-meta">Loading…</p>
+        </div>
+
+        <!-- Search results (replaces the grid when a query is active) -->
+        <section class="reader-search-results" id="search-results" hidden
+                 aria-label="Search results"></section>
+
+        <!-- Grid is rendered here by script.js -->
+        <section class="reader-grid" id="book-grid"
+                 aria-label="Book library" aria-live="polite"></section>
+
+        <!-- Empty state -->
+        <div class="reader-empty" id="empty-state" hidden>
+          <div class="reader-empty__art" aria-hidden="true">▤</div>
+          <h2 class="reader-empty__title">Your library is empty</h2>
+          <p class="reader-empty__desc">
+            Import an EPUB or PDF to start reading. Click
+            <strong>Import</strong> above, or drop a file anywhere on this page.
+          </p>
+          <button class="dot-btn dot-btn--primary dot-btn--lg" id="empty-import">
+            <span aria-hidden="true">＋</span>
+            <span>Import a book</span>
+          </button>
+        </div>
+
+        <!-- Error banner -->
+        <div class="reader-error" id="error-banner" role="alert" hidden></div>
+      </div>
+
+      <!-- ============================================================
+           Reading view — inline on desktop (>1200px), fullscreen
+           overlay on mobile. See style.css for the media query.
+           ============================================================ -->
+      <section class="reader-view" id="reader-view" hidden
+               aria-modal="true" role="dialog" aria-label="Reading view">
+        <!-- Floating top bar — fades out when idle for distraction-free reading -->
+        <header class="reader-view__bar" id="rv-bar">
+          <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-close"
+                  aria-label="Close reading view" title="Back to library (Esc)">✕</button>
+          <div class="reader-view__titles">
+            <span class="reader-view__title" id="rv-title"></span>
+            <span class="reader-view__author" id="rv-author"></span>
+          </div>
+          <div class="reader-view__tools">
+            <select class="reader-view__fontselect" id="rv-font-family"
+                    aria-label="Font family" title="Font family">
+              <option value="serif">Serif</option>
+              <option value="sans">Sans</option>
+              <option value="mono">Mono</option>
+            </select>
+            <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-font-dec"
+                    aria-label="Decrease font size" title="Smaller text">A−</button>
+            <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-font-inc"
+                    aria-label="Increase font size" title="Larger text">A+</button>
+            <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-toc-btn"
+                    aria-label="Toggle table of contents" title="Table of contents (t)"
+                    hidden>☰</button>
+            <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-fullscreen"
+                    aria-label="Toggle fullscreen" title="Fullscreen (f)">⤢</button>
+            <span class="reader-view__pos" id="rv-pos"></span>
+          </div>
+        </header>
+
+        <div class="reader-view__page dot-scroll" id="rv-page"></div>
+
+        <footer class="reader-view__nav" id="rv-nav">
+          <button class="dot-btn dot-btn--secondary dot-btn--lg" id="rv-prev"
+                  aria-label="Previous page">← Prev</button>
+          <span class="reader-view__pager" id="rv-pager"></span>
+          <button class="dot-btn dot-btn--secondary dot-btn--lg" id="rv-next"
+                  aria-label="Next page">Next →</button>
+        </footer>
+
+        <!-- Table of contents slide-over -->
+        <aside class="reader-view__toc dot-scroll" id="rv-toc" hidden
+               aria-label="Table of contents">
+          <div class="reader-view__toc-head">
+            <span>Contents</span>
+            <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-toc-close"
+                    aria-label="Close table of contents">✕</button>
+          </div>
+          <ol class="reader-view__toc-list" id="rv-toc-list"></ol>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <!-- Import progress toast -->
+  <div class="reader-toast" id="import-toast" role="status" hidden></div>
+
+  <script src="/reader/script.js"></script>
+</body>
+</html>

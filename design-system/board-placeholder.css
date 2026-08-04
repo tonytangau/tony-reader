@@ -1,0 +1,47 @@
+/* Dot — shared styles for the per-project Board placeholder pages.
+ *
+ * Consumed by projects/<name>/board/index.html stubs so the placeholder
+ * markup is never duplicated and always uses Design System tokens
+ * (`--dot-*` variables only — no hardcoded color/radius/shadow values).
+ * The full Kanban UI lives at ~/dot/board/index.html; this is only the
+ * stub shown until the multi-project Board shell is wired up (phase3).
+ */
+
+.dot-board-placeholder {
+  font-family: var(--dot-font-base);
+  background: var(--dot-bg);
+  color: var(--dot-text-primary);
+  margin: 0;
+  padding: 2.5rem 1.5rem;
+}
+
+.dot-board-placeholder__card {
+  max-width: 640px;
+  margin: 0 auto;
+  background: var(--dot-bg-surface);
+  border: 1px solid var(--dot-border);
+  border-radius: var(--dot-radius-md);
+  box-shadow: var(--dot-shadow-xs);
+  padding: 2rem;
+}
+
+.dot-board-placeholder__title {
+  font-size: var(--dot-fs-h2);
+  font-weight: var(--dot-fw-bold);
+  margin: 0 0 .5rem;
+}
+
+.dot-board-placeholder__text {
+  color: var(--dot-text-secondary);
+  font-size: var(--dot-fs-body);
+  margin: .25rem 0;
+}
+
+.dot-board-placeholder__badge {
+  display: inline-block;
+  font-size: var(--dot-fs-micro);
+  color: var(--dot-primary);
+  background: var(--dot-primary-subtle);
+  border-radius: var(--dot-radius-pill);
+  padding: 2px 8px;
+}

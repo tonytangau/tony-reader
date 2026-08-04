@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dot DS — Primary Blue Comparison</title>
+  <style>
+    /* Outer page chrome — neutral, so it doesn't compete with the variants */
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #0f0f10;
+      color: #e9e9ec;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      padding: 22px 28px 16px;
+      border-bottom: 1px solid #26262b;
+    }
+    header h1 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+    }
+    header p {
+      margin: 0;
+      font-size: 13px;
+      color: #9a9ca3;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      height: calc(100vh - 73px);
+    }
+    .col {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #26262b;
+      min-width: 0;
+    }
+    .col:last-child { border-right: none; }
+    .col-label {
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 650;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #9a9ca3;
+      background: #161617;
+      border-bottom: 1px solid #26262b;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .col-label .dot {
+      width: 14px; height: 14px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .col-label .hex {
+      margin-left: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      color: #6a6c73;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: #fbfbfa;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Dot Design System — Primary Blue Comparison</h1>
+    <p>Three candidate primaries, identical demo markup. Hover the buttons to see hover/active states.</p>
+  </header>
+
+  <div class="grid">
+    <div class="col">
+      <div class="col-label">
+        <span class="dot" style="background:#3e8eca"></span>
+        Warm Sky
+        <span class="hex">#3E8ECA</span>
+      </div>
+      <iframe id="f-warm"></iframe>
+    </div>
+    <div class="col">
+      <div class="col-label">
+        <span class="dot" style="background:#3f6ec8"></span>
+        Current Azure
+        <span class="hex">#3F6EC8</span>
+      </div>
+      <iframe id="f-base"></iframe>
+    </div>
+    <div class="col">
+      <div class="col-label">
+        <span class="dot" style="background:#6b8fad"></span>
+        Muted Slate
+        <span class="hex">#6B8FAD</span>
+      </div>
+      <iframe id="f-slate"></iframe>
+    </div>
+  </div>
+
+  <script>
+    // Shared demo markup — uses --dot-* variables only.
+    // Each variant CSS redefines :root, so we isolate via iframe srcdoc.
+    const demo = (cssHref) => `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="${cssHref}" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px;
+      background: var(--dot-bg);
+      color: var(--dot-text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    section { margin-bottom: 26px; }
+    h2 {
+      margin: 0 0 12px;
+      font-size: 11px;
+      font-weight: 650;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--dot-text-tertiary);
+    }
+
+    /* ---- Swatches ---- */
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .swatch {
+      border-radius: var(--dot-radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--dot-border);
+      background: var(--dot-bg-elevated);
+    }
+    .swatch .chip { height: 44px; }
+    .swatch .meta {
+      padding: 6px 8px;
+      font-size: 10px;
+      line-height: 1.3;
+    }
+    .swatch .name { color: var(--dot-text-secondary); font-weight: 600; }
+    .swatch .val {
+      color: var(--dot-text-tertiary);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    /* ---- Buttons ---- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: inherit;
+      font-weight: 550;
+      border-radius: var(--dot-radius-sm);
+      border: 1px solid transparent;
+      background: var(--dot-primary);
+      color: var(--dot-primary-on);
+      cursor: pointer;
+      transition: background var(--dot-dur) var(--dot-ease),
+                  border-color var(--dot-dur) var(--dot-ease),
+                  box-shadow var(--dot-dur) var(--dot-ease);
+      text-decoration: none;
+      user-select: none;
+    }
+    .btn:hover { background: var(--dot-primary-hover); }
+    .btn:active { background: var(--dot-primary-active); }
+    .btn:focus-visible { outline: none; box-shadow: var(--dot-focus-ring); }
+    .btn-sm   { padding: 4px 10px;  font-size: 12px; }
+    .btn-def  { padding: 7px 14px;  font-size: 13px; }
+    .btn-lg   { padding: 10px 18px; font-size: 15px; }
+    .btn-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    /* ---- Tag ---- */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: var(--dot-radius-pill);
+      font-size: 12px;
+      font-weight: 550;
+      background: var(--dot-primary-subtle);
+      color: var(--dot-primary-fg);
+    }
+    .tag::before {
+      content: "";
+      width: 6px; height: 6px;
+      border-radius: 9999px;
+      background: var(--dot-primary);
+    }
+
+    /* ---- Kanban card ---- */
+    .board {
+      background: var(--dot-bg-sunken);
+      border-radius: var(--dot-radius-lg);
+      padding: 10px;
+    }
+    .card {
+      background: var(--dot-bg-elevated);
+      border: 1px solid var(--dot-border);
+      border-radius: var(--dot-radius-md);
+      padding: 12px;
+      box-shadow: var(--dot-shadow-sm);
+      transition: box-shadow var(--dot-dur) var(--dot-ease),
+                  border-color var(--dot-dur) var(--dot-ease);
+    }
+    .card:hover {
+      box-shadow: var(--dot-shadow-md);
+      border-color: var(--dot-border-strong);
+    }
+    .card-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--dot-text-primary);
+      margin: 0 0 8px;
+      line-height: 1.4;
+    }
+    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .card-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      font-weight: 550;
+      padding: 2px 8px;
+      border-radius: var(--dot-radius-pill);
+      background: var(--dot-status-progress-bg);
+      color: var(--dot-status-progress-fg);
+    }
+    .status::before {
+      content: "";
+      width: 6px; height: 6px;
+      border-radius: 9999px;
+      background: var(--dot-status-progress);
+    }
+    .avatars { display: flex; }
+    .avatar {
+      width: 22px; height: 22px;
+      border-radius: 9999px;
+      border: 2px solid var(--dot-bg-elevated);
+      margin-left: -6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 650;
+      color: #fff;
+    }
+    .avatar:first-child { margin-left: 0; }
+    .avatar.a { background: var(--dot-primary); }
+    .avatar.b { background: var(--dot-status-agent); }
+    .avatar.c { background: var(--dot-status-done); }
+
+    /* ---- Link / focus sample ---- */
+    .link {
+      color: var(--dot-primary-fg);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      text-decoration-color: var(--dot-primary-subtle-2);
+    }
+    .link:hover { color: var(--dot-primary); text-decoration-color: var(--dot-primary); }
+    .misc-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+  <section>
+    <h2>Swatches</h2>
+    <div class="swatches">
+      <div class="swatch"><div class="chip" style="background:var(--dot-primary)"></div><div class="meta"><div class="name">Primary</div><div class="val">primary</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--dot-primary-hover)"></div><div class="meta"><div class="name">Hover</div><div class="val">hover</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--dot-primary-active)"></div><div class="meta"><div class="name">Active</div><div class="val">active</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--dot-primary-press)"></div><div class="meta"><div class="name">Press</div><div class="val">press</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--dot-primary-fg)"></div><div class="meta"><div class="name">FG</div><div class="val">fg</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--dot-primary-subtle)"></div><div class="meta"><div class="name">Subtle</div><div class="val">0.08</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--dot-primary-subtle-2)"></div><div class="meta"><div class="name">Subtle-2</div><div class="val">0.14</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--dot-primary);box-shadow:inset 0 0 0 3px var(--dot-primary-subtle-2)"></div><div class="meta"><div class="name">On White</div><div class="val">contrast</div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Primary Buttons</h2>
+    <div class="btn-row">
+      <button class="btn btn-sm">Save</button>
+      <button class="btn btn-def">Save changes</button>
+      <button class="btn btn-lg">Create project</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Tag &amp; Link</h2>
+    <div class="misc-row">
+      <span class="tag">design-system</span>
+      <a class="link" href="#">View pull request</a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Kanban Card</h2>
+    <div class="board">
+      <div class="card">
+        <p class="card-title">Ship new primary color for the design system</p>
+        <div class="card-tags">
+          <span class="tag">frontend</span>
+          <span class="tag">tokens</span>
+        </div>
+        <div class="card-foot">
+          <span class="status">In progress</span>
+          <div class="avatars">
+            <span class="avatar a">AK</span>
+            <span class="avatar b">JR</span>
+            <span class="avatar c">+2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>`;
+
+    document.getElementById('f-warm').srcdoc  = demo('colors-warm.css');
+    document.getElementById('f-base').srcdoc  = demo('colors.css');
+    document.getElementById('f-slate').srcdoc = demo('colors-slate.css');
+  </script>
+</body>
+</html>
