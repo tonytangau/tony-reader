@@ -19,7 +19,8 @@
         "reader-reading-view",
         "reader-backend",
         "reader-polish",
-        "reader-cover-extract"
+        "reader-cover-extract",
+        "reader-import-fix"
       ]
     }
   ],
@@ -407,6 +408,25 @@
       "dependsOn": [],
       "created": "2026-08-04T23:52:22Z",
       "updated": "2026-08-05T10:12:09Z"
+    },
+    {
+      "id": "reader-import-fix",
+      "title": "Reader PDF 导入修复：中文文件名 + 大文件支持",
+      "description": "修复两个导入 Bug：\n1. 中文文件名（如「走出戈壁」）导致 HTTP header 报错「String contains non ISO-8859-1 code point」——前端需 encodeURIComponent，后端需 unquote 解码\n2. 101MB PDF 超过 100MB 上传限制返回 413 —— 提到 500MB\n\n验证：用走出戈壁.pdf (101MB, 中文文件名) 成功导入，元数据提取正确。",
+      "status": "done",
+      "tags": [
+        "reader",
+        "bug",
+        "backend",
+        "frontend"
+      ],
+      "priority": "high",
+      "brainRef": "dot/AGENTS.md",
+      "assignee": "agent",
+      "readyForAgent": true,
+      "dependsOn": [],
+      "created": "2026-08-05T13:00:01Z",
+      "updated": "2026-08-05T13:15:00Z"
     }
   ]
 }
