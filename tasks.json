@@ -394,7 +394,7 @@
       "id": "backlog-8081-display",
       "title": "Reader :8081 独立部署后 UI 显示问题修复",
       "description": "Reader 独立部署到 :8081 后，页面显示不正常。需要排查：CSS 路径是否正确加载、design-system 引用是否生效、API base URL 是否正确指向 :8081。修复后验证页面正常渲染。",
-      "status": "backlog",
+      "status": "done",
       "tags": [
         "frontend",
         "reader",
@@ -405,7 +405,8 @@
       "assignee": "agent",
       "readyForAgent": false,
       "dependsOn": [],
-      "created": "2026-08-04T23:52:22Z"
+      "created": "2026-08-04T23:52:22Z",
+      "updated": "2026-08-05T10:12:09Z"
     }
   ]
 }

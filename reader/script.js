@@ -687,7 +687,7 @@ const THEME_KEY = 'dot.reader.theme';
           method: 'POST',
           headers: {
             'Content-Type': file.type || 'application/octet-stream',
-            'X-Filename': file.name,
+            'X-Filename': encodeURIComponent(file.name),
           },
           body: file,
         });

@@ -1200,6 +1200,8 @@ class Handler(BaseHTTPRequestHandler):
         if not filename:
             return self._error(400, "missing filename (send X-Filename header "
                                "or ?filename=)")
+        # The browser sends URL-encoded filenames for non-ASCII characters.
+        filename = unquote(filename)
         # Guard against path traversal in the supplied filename.
         filename = os.path.basename(filename)
         ext = os.path.splitext(filename)[1].lower()
