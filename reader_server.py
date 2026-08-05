@@ -74,7 +74,7 @@ PAGE_SIZE = 3000
 MAX_BODY = 1 << 20  # 1 MiB
 # Max size for a raw file upload (an EPUB/PDF streamed straight from the
 # browser file picker). Books are usually a few MB; allow headroom.
-UPLOAD_MAX_BODY = 100 << 20  # 100 MiB
+UPLOAD_MAX_BODY = 500 << 20  # 500 MiB
 
 # Full-text search tuning.
 SEARCH_MAX_PER_BOOK = 8      # max matching pages returned per book
