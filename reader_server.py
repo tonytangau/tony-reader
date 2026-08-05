@@ -61,8 +61,7 @@ PORT = 8081
 
 DATA_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "data")
-STATIC_DIR = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "reader")
+STATIC_DIR = os.path.dirname(os.path.abspath(__file__))
 BOOKS_DIR = os.path.join(DATA_DIR, "books")
 COVERS_DIR = os.path.join(DATA_DIR, "covers")
 LIBRARY_FILE = os.path.join(DATA_DIR, "library.json")
@@ -1151,8 +1150,8 @@ class Handler(BaseHTTPRequestHandler):
             if path.startswith("/api/reader/cover/"):
                 return self._cover(path, qs)
             # Serve static files (frontend UI)
-            if path == "/":
-                path = "/index.html"
+            if path in ("/", "/reader"):
+                path = "/reader/index.html"
             static_path = os.path.join(STATIC_DIR, path.lstrip("/"))
             if os.path.isfile(static_path):
                 return self._serve_file(static_path)
