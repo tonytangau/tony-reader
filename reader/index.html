@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dot Reader — Library</title>
+  <title>Tony's Reader</title>
   <link rel="stylesheet" href="/design-system/colors.css">
   <link rel="stylesheet" href="/design-system/typography.css">
   <link rel="stylesheet" href="/design-system/components.css">
@@ -17,7 +17,7 @@
   <header class="reader-appbar">
     <div class="reader-appbar__brand">
       <span class="reader-appbar__mark" aria-hidden="true">R</span>
-      <span class="reader-appbar__title">Dot Reader</span>
+      <span class="reader-appbar__title">Tony's Reader</span>
     </div>
 
     <div class="reader-appbar__search">
@@ -32,6 +32,11 @@
     </div>
 
     <div class="reader-appbar__actions">
+      <div class="reader-theme-switch" id="theme-switch" role="radiogroup" aria-label="Reading theme">
+        <button class="reader-theme-btn active" data-theme="dark"  title="Dark"  aria-checked="true">◉</button>
+        <button class="reader-theme-btn"        data-theme="sepia" title="Sepia" aria-checked="false">◉</button>
+        <button class="reader-theme-btn"        data-theme="light" title="Light" aria-checked="false">◉</button>
+      </div>
       <button class="dot-btn dot-btn--primary dot-btn--lg" id="import-btn"
               aria-label="Import books">
         <span aria-hidden="true">＋</span>
@@ -163,6 +168,7 @@
 
   <!-- Import progress toast -->
   <div class="reader-toast" id="import-toast" role="status" hidden></div>
+
 
   <script src="/reader/script.js"></script>
 </body>
