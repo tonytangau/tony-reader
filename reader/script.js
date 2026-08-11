@@ -745,7 +745,7 @@ const THEME_KEY = 'dot.reader.theme';
       author: book.author || 'Unknown author',
       page: Number(page || book.last_page || 1) || 1,
       page_count: Number(book.page_count || 0),
-      toc: null,            // populated on first page load
+      toc: null,
       lastViewedPage: null,
     };
     rvTitle.textContent = currentBook.title;
@@ -757,7 +757,8 @@ const THEME_KEY = 'dot.reader.theme';
     revealChrome();
     closeToc();
     startReadingTimer();
-    await loadPage(currentBook.page);
+    // Load entire book at once — continuous scroll, no page flipping
+    await loadAllPages();
     markActiveSidebar();
   }
 
@@ -767,6 +768,8 @@ const THEME_KEY = 'dot.reader.theme';
     document.body.style.overflow = '';
     currentBook = null;
     rvPage.textContent = '';
+    rvPage.removeEventListener('scroll', trackScrollProgress);
+    rvNav.hidden = false;
     closeToc();
     stopReadingTimer();
     // Cancel any pending idle-hide timer so a stale callback can't
@@ -787,47 +790,55 @@ const THEME_KEY = 'dot.reader.theme';
     });
   }
 
-  async function loadPage(page) {
+  async function loadAllPages() {
     if (!currentBook) return;
+    const pc = currentBook.page_count;
+    if (!pc) return;
     rvPage.textContent = 'Loading…';
-    rvPrev.disabled = true;
-    rvNext.disabled = true;
+    rvNav.hidden = true;  // no need for prev/next with continuous scroll
+
     try {
-      const url = api('/api/reader/book/' + encodeURIComponent(currentBook.id) +
-                      '?page=' + page);
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      currentBook.page = data.page || page;
-      currentBook.page_count = data.page_count || currentBook.page_count;
+      // Fetch all pages in parallel
+      const promises = [];
+      for (let p = 1; p <= pc; p++) {
+        const url = api('/api/reader/book/' + encodeURIComponent(currentBook.id) +
+                        '?page=' + p);
+        promises.push(fetch(url, { cache: 'no-store' }).then(r => r.json()));
+      }
+      const allData = await Promise.all(promises);
+
+      // Extract TOC from first page
       if (currentBook.toc === null) {
-        currentBook.toc = Array.isArray(data.toc) ? data.toc : [];
+        currentBook.toc = Array.isArray(allData[0].toc) ? allData[0].toc : [];
         setupToc();
       }
-      renderPageContent(data.content || '');
-      const pc = currentBook.page_count;
-      const pctVal = pc ? Math.round((currentBook.page / pc) * 100) : 0;
-      rvPos.textContent = pctVal + '%';
-      if (rvPageJump) { rvPageJump.max = pc || 1; rvPageJump.value = currentBook.page; }
-      if (rvPagerLabel) rvPagerLabel.textContent = pc ? ('of ' + pc) : '';
-      rvPrev.disabled = currentBook.page <= 1;
-      rvNext.disabled = pc ? currentBook.page >= pc : true;
+
+      // Concatenate all content with page separators
+      let allContent = '';
+      for (let i = 0; i < allData.length; i++) {
+        if (i > 0) allContent += '\n\n';
+        allContent += (allData[i].content || '');
+      }
+
+      renderPageContent(allContent);
+      rvPos.textContent = pc + ' pages loaded';
       rvPage.scrollTop = 0;
-      recordPageView(currentBook.page);
-      markTocCurrent();
-      // Persist reading position explicitly on every page turn so progress
-      // auto-resumes on reopen even if the book GET side-effect is later
-      // removed. Fire-and-forget; failures are non-fatal.
-      saveProgress(currentBook.id, currentBook.page);
+
+      // Track scroll progress
+      rvPage.addEventListener('scroll', trackScrollProgress);
     } catch (e) {
-      rvPage.textContent = 'Failed to load page: ' + e.message;
-      // Re-enable nav buttons based on the current known position so the
-      // user can retry / move away after a failed page load (otherwise
-      // they'd stay disabled from the pre-fetch state above).
-      rvPrev.disabled = currentBook.page <= 1;
-      rvNext.disabled = currentBook.page_count
-        ? currentBook.page >= currentBook.page_count : true;
+      rvPage.textContent = 'Failed to load: ' + e.message;
+      rvNav.hidden = false;
     }
+  }
+
+  function trackScrollProgress() {
+    if (!currentBook) return;
+    const el = rvPage;
+    const pct = el.scrollHeight - el.clientHeight;
+    if (pct <= 0) return;
+    const progress = Math.round((el.scrollTop / pct) * 100);
+    rvPos.textContent = progress + '% read';
   }
 
   // Render extracted plain text as clean paragraphs. Book pages are stored
@@ -1047,10 +1058,6 @@ const THEME_KEY = 'dot.reader.theme';
     if (inField) return;  // don't hijack typing inside inputs
 
     switch (e.key) {
-      case 'ArrowLeft':
-        e.preventDefault(); rvPrev.click(); break;
-      case 'ArrowRight':
-        e.preventDefault(); rvNext.click(); break;
       case 'f': case 'F':
         e.preventDefault(); toggleFullscreen(); break;
       case 't': case 'T':

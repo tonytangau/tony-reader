@@ -689,6 +689,7 @@ body.is-reading .reader-library { display: none; }
   justify-content: center;
   gap: var(--dot-space-5);
 }
+.reader-view__nav[hidden] { display: none !important; }
 
 .reader-view.is-idle .reader-view__bar {
   opacity: 0;
