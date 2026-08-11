@@ -1,53 +1,53 @@
 {
-  "83b91c88ca90": {
-    "id": "83b91c88ca90",
+  "70720dc885f0": {
+    "id": "70720dc885f0",
     "title": "恶意",
     "author": "东野圭吾",
-    "cover_url": "/api/reader/cover/83b91c88ca90",
+    "cover_url": "/api/reader/cover/70720dc885f0",
     "page_count": 45,
-    "last_page": 10,
-    "last_position": 0.2222,
-    "imported_at": "2026-08-11T12:42:42Z",
-    "updated_at": "2026-08-11T12:42:57Z",
+    "last_page": 40,
+    "last_position": 0.8889,
+    "imported_at": "2026-08-11T13:57:01Z",
+    "updated_at": "2026-08-11T13:57:53Z",
     "source_format": "epub",
     "has_toc": true
   },
-  "5fb38a8cd757": {
-    "id": "5fb38a8cd757",
+  "8738ea24c091": {
+    "id": "8738ea24c091",
     "title": "​嫌疑犯X的献身",
     "author": "东野圭吾",
-    "cover_url": "/api/reader/cover/5fb38a8cd757",
+    "cover_url": "/api/reader/cover/8738ea24c091",
     "page_count": 54,
     "last_page": 1,
     "last_position": 0.0,
-    "imported_at": "2026-08-11T12:42:42Z",
-    "updated_at": "2026-08-11T12:42:42Z",
+    "imported_at": "2026-08-11T13:57:01Z",
+    "updated_at": "2026-08-11T13:57:01Z",
     "source_format": "epub",
     "has_toc": true
   },
-  "da72775afdf2": {
-    "id": "da72775afdf2",
+  "505ec6da93ce": {
+    "id": "505ec6da93ce",
     "title": "走出戈壁",
     "author": "单伟建",
-    "cover_url": "/api/reader/cover/da72775afdf2",
+    "cover_url": "/api/reader/cover/505ec6da93ce",
     "page_count": 97,
-    "last_page": 1,
-    "last_position": 0.0,
-    "imported_at": "2026-08-11T12:42:42Z",
-    "updated_at": "2026-08-11T12:42:42Z",
+    "last_page": 9,
+    "last_position": 0.0928,
+    "imported_at": "2026-08-11T13:57:01Z",
+    "updated_at": "2026-08-11T13:57:15Z",
     "source_format": "epub",
     "has_toc": true
   },
-  "49411ed6f87a": {
-    "id": "49411ed6f87a",
+  "4d5564986a86": {
+    "id": "4d5564986a86",
     "title": "白夜行",
     "author": "东野圭吾",
-    "cover_url": "/api/reader/cover/49411ed6f87a",
+    "cover_url": "/api/reader/cover/4d5564986a86",
     "page_count": 107,
     "last_page": 1,
     "last_position": 0.0,
-    "imported_at": "2026-08-11T12:42:42Z",
-    "updated_at": "2026-08-11T12:42:42Z",
+    "imported_at": "2026-08-11T13:57:01Z",
+    "updated_at": "2026-08-11T13:57:01Z",
     "source_format": "epub",
     "has_toc": true
   }

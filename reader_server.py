@@ -329,11 +329,25 @@ def load_book(book_id: str) -> dict | None:
 
 
 def save_book(book: dict) -> None:
+    """Persist a book record, sanitising page text for safe JSON storage."""
     ensure_dirs()
     fpath = book_path(book["id"])
     tmp = fpath + ".tmp"
+
+    # Sanitise page text: strip control characters (except newline/tab) that
+    # would break JSON serialisation.
+    def _clean(text: str) -> str:
+        return "".join(
+            ch for ch in text
+            if ch == "\n" or ch == "\t" or ord(ch) >= 32 or ord(ch) in (0x0D,)
+        )
+
+    safe = dict(book)
+    if "pages" in safe:
+        safe["pages"] = [_clean(p) for p in safe["pages"]]
+
     with open(tmp, "w", encoding="utf-8") as fh:
-        json.dump(book, fh, ensure_ascii=False, indent=2)
+        json.dump(safe, fh, ensure_ascii=False, indent=2)
     os.replace(tmp, fpath)
 
 
