@@ -44,6 +44,7 @@ from __future__ import annotations
 import base64
 import datetime
 import hashlib
+import io
 import json
 import mimetypes
 import os
@@ -56,11 +57,29 @@ from urllib.parse import urlparse, parse_qs, unquote
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-HOST = "127.0.0.1"
+HOST = "0.0.0.0"
 PORT = 8081
+
+# DeepSeek API for metadata refinement — load key from .env in hermes root
+_DS_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+if not _DS_KEY:
+    _env_path = os.path.join(os.path.expanduser("~"), ".hermes", ".env")
+    try:
+        with open(_env_path) as fh:
+            for line in fh:
+                line = line.strip()
+                if line.startswith("DEEPSEEK_API_KEY="):
+                    _DS_KEY = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    break
+    except OSError:
+        pass
+LLM_API_KEY = _DS_KEY
+LLM_API_URL = "https://api.deepseek.com/v1/chat/completions"
+LLM_MODEL = "deepseek-chat"
 
 DATA_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "data")
+SOURCES_DIR = os.path.join(DATA_DIR, "sources")  # stored uploaded PDFs for page-image serving
 STATIC_DIR = os.path.dirname(os.path.abspath(__file__))
 BOOKS_DIR = os.path.join(DATA_DIR, "books")
 COVERS_DIR = os.path.join(DATA_DIR, "covers")
@@ -75,6 +94,54 @@ MAX_BODY = 1 << 20  # 1 MiB
 # Max size for a raw file upload (an EPUB/PDF streamed straight from the
 # browser file picker). Books are usually a few MB; allow headroom.
 UPLOAD_MAX_BODY = 500 << 20  # 500 MiB
+
+# ---------------------------------------------------------------------------
+# Douban book rating scraper (stdlib only, no deps)
+# ---------------------------------------------------------------------------
+
+def fetch_douban_rating(title: str, author: str = "") -> dict | None:
+    """Try to get Douban rating for a book by title. Returns {rating, rating_count} or None."""
+    import urllib.request
+
+    UA = ("Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) "
+          "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1")
+    headers = {"User-Agent": UA, "Accept-Language": "zh-CN,zh-Hans;q=0.9"}
+
+    try:
+        # Step 1: search by title
+        q = urllib.parse.quote(title)
+        req = urllib.request.Request(
+            f"https://m.douban.com/search/?query={q}&type=book", headers=headers)
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            html = resp.read().decode("utf-8", errors="replace")
+
+        m = re.search(r'/book/subject/(\d+)/', html)
+        if not m:
+            return None
+        subject_id = m.group(1)
+
+        # Step 2: fetch detail page for rating
+        req2 = urllib.request.Request(
+            f"https://m.douban.com/book/subject/{subject_id}/", headers=headers)
+        with urllib.request.urlopen(req2, timeout=8) as resp:
+            html2 = resp.read().decode("utf-8", errors="replace")
+
+        rating = None
+        rm = re.search(r'itemprop="ratingValue"\s+content="([\d.]+)"', html2)
+        if rm:
+            rating = float(rm.group(1))
+
+        rating_count = None
+        vm = re.search(r'itemprop="reviewCount"\s+content="(\d+)"', html2)
+        if vm:
+            rating_count = int(vm.group(1))
+
+        if rating is not None:
+            return {"rating": rating, "rating_count": rating_count}
+
+        return None
+    except Exception:
+        return None  # network issues, rate-limiting, etc. — non-fatal
 
 # Full-text search tuning.
 SEARCH_MAX_PER_BOOK = 8      # max matching pages returned per book
@@ -226,7 +293,7 @@ _resolve_cover_palette()
 # Storage helpers
 # ---------------------------------------------------------------------------
 def ensure_dirs() -> None:
-    for d in (DATA_DIR, BOOKS_DIR, COVERS_DIR):
+    for d in (DATA_DIR, BOOKS_DIR, COVERS_DIR, SOURCES_DIR):
         os.makedirs(d, exist_ok=True)
 
 
@@ -760,14 +827,21 @@ def parse_pdf(path: str) -> dict:
         title, author = "Unknown", "Unknown"
 
     parts: list[str] = []
+    total_pages = len(reader.pages)
     for page in reader.pages:
         try:
             txt = page.extract_text() or ""
         except Exception:
             txt = ""
-        parts.append(_normalize_whitespace(txt))
+        txt = _normalize_whitespace(txt)
+        # If text extraction returned empty (scanned PDF with no OCR layer),
+        # insert a placeholder so the page still shows up. Without this,
+        # 100+ page scanned PDFs would appear as "0 pages / empty".
+        if not txt.strip():
+            txt = "（此页面无可提取的文字 — 可能是扫描版 PDF）"
+        parts.append(txt)
 
-    full_text = "\n\n".join(p for p in parts if p.strip()).strip()
+    full_text = "\n\n".join(parts).strip()
 
     # Cover = first page rendered as an image is heavy; PyPDF2 can't render.
     # Instead, try to extract an embedded cover image from page 1's /XObject
@@ -783,11 +857,66 @@ def parse_pdf(path: str) -> dict:
         "title": title,
         "author": author,
         "text": full_text,
+        "pdf_page_count": total_pages,
         "cover_bytes": cover_bytes,
         "cover_mime": cover_mime,
         "doc_offsets": [],
         "toc_raw": [],
     }
+
+
+
+def _pdf_page_to_jpeg(pdf_path: str, page_num: int, max_width: int = 1200) -> bytes | None:
+    """Extract an image from a specific PDF page, returning JPEG bytes.
+
+    For scanned PDFs, each page is typically one large embedded image.
+    Extracts the largest XObject image on the page, resizes it to
+    *max_width* preserving aspect ratio, and returns JPEG bytes.
+    Returns None if no image is found.
+    """
+    from PyPDF2 import PdfReader
+    from PIL import Image
+
+    reader = PdfReader(pdf_path)
+    if page_num < 1 or page_num > len(reader.pages):
+        return None
+    page = reader.pages[page_num - 1]
+    resources = page.get("/Resources")
+    if resources is None:
+        return None
+    xobj = resources.get("/XObject")
+    if xobj is None:
+        return None
+    xobj = xobj.get_object()
+
+    best_img = None
+    best_w = 0
+    for key in xobj:
+        try:
+            o = xobj[key].get_object()
+        except Exception:
+            continue
+        if o.get("/Subtype") != "/Image":
+            continue
+        w = int(o.get("/Width", 0))
+        if w > best_w:
+            img = _pdf_xobject_to_pil(o)
+            if img is not None:
+                best_img = img
+                best_w = w
+    if best_img is None:
+        return None
+
+    # Resize to max_width, preserving aspect ratio
+    if best_img.width > max_width:
+        ratio = max_width / best_img.width
+        new_h = int(best_img.height * ratio)
+        best_img = best_img.resize((max_width, new_h), Image.LANCZOS)
+
+    import io
+    buf = io.BytesIO()
+    best_img.convert("RGB").save(buf, "JPEG", quality=85)
+    return buf.getvalue()
 
 
 def _extract_pdf_first_image(reader) -> tuple[bytes | None, str | None]:
@@ -913,6 +1042,17 @@ def import_file(path: str) -> dict:
     pages_with_offsets = chunk_pages_with_offsets(parsed["text"], PAGE_SIZE)
     pages = [p[0] for p in pages_with_offsets]
     page_starts = [p[1] for p in pages_with_offsets]
+
+    # For scanned PDFs where text extraction fails on every page,
+    # chunk_pages_with_offsets may collapse all placeholder texts into a
+    # single page. Preserve the original page count from the PDF metadata.
+    pdf_page_count = parsed.get("pdf_page_count", 0)
+    if ext == ".pdf" and pdf_page_count > len(pages):
+        # Pad with placeholder pages to match the real page count.
+        while len(pages) < pdf_page_count:
+            pages.append("（此页面无可提取的文字 — 可能是扫描版 PDF）")
+        while len(page_starts) < pdf_page_count:
+            page_starts.append(0)  # offset not meaningful for placeholders
     book_id = uuid.uuid4().hex[:12]
 
     # Resolve EPUB TOC entries (which reference source document hrefs)
@@ -958,7 +1098,7 @@ def import_file(path: str) -> dict:
 
 def _summary(book: dict) -> dict:
     """Library-list projection of a full book record (no page text)."""
-    return {
+    s = {
         "id": book["id"],
         "title": book["title"],
         "author": book["author"],
@@ -971,6 +1111,11 @@ def _summary(book: dict) -> dict:
         "source_format": book.get("source_format"),
         "has_toc": bool(book.get("toc")),
     }
+    # Douban rating (optional)
+    if book.get("douban_rating") is not None:
+        s["douban_rating"] = book["douban_rating"]
+        s["douban_rating_count"] = book.get("douban_rating_count")
+    return s
 
 
 def _resolve_toc(toc_raw: list[dict],
@@ -1048,7 +1193,7 @@ class Handler(BaseHTTPRequestHandler):
     # -- plumbing ----------------------------------------------------------
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "*")
 
     def _send_json(self, payload, status=200):
@@ -1109,7 +1254,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", mime)
             self.send_header("Content-Length", str(len(data)))
-            self.send_header("Cache-Control", "public, max-age=3600")
+            self.send_header("Cache-Control", "no-cache")
             self.end_headers()
             self.wfile.write(data)
         except OSError:
@@ -1124,6 +1269,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._import()
             if path == "/api/reader/progress":
                 return self._save_progress()
+            if path == "/api/reader/refine-metadata":
+                return self._refine_metadata()
             return self._error(404, "unknown route: " + path)
         except FileNotFoundError as e:
             return self._error(404, str(e))
@@ -1142,13 +1289,15 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/api/reader/health":
                 return self._send_json({"status": "ok"})
             if path == "/api/reader/library":
-                return self._library()
+                return self._library(qs)
             if path == "/api/reader/search":
                 return self._search(qs)
             if path.startswith("/api/reader/book/"):
                 return self._book(path, qs)
             if path.startswith("/api/reader/cover/"):
                 return self._cover(path, qs)
+            if path.startswith("/api/reader/page-image/"):
+                return self._page_image(path, qs)
             # Serve static files (frontend UI)
             if path in ("/", "/reader"):
                 path = "/reader/index.html"
@@ -1159,6 +1308,28 @@ class Handler(BaseHTTPRequestHandler):
         except FileNotFoundError as e:
             return self._error(404, str(e))
         except Exception as e:  # pragma: no cover
+            return self._error(500, "server error: " + str(e))
+
+    def do_DELETE(self):  # noqa: N802
+        parsed = urlparse(self.path)
+        path = parsed.path.rstrip("/") or "/"
+        try:
+            if path.startswith("/api/reader/book/"):
+                return self._delete_book(path)
+            return self._error(404, "unknown route: " + path)
+        except FileNotFoundError as e:
+            return self._error(404, str(e))
+        except Exception as e:
+            return self._error(500, "server error: " + str(e))
+
+    def do_PATCH(self):  # noqa: N802
+        parsed = urlparse(self.path)
+        path = parsed.path.rstrip("/") or "/"
+        try:
+            if path.startswith("/api/reader/book/"):
+                return self._edit_book(path)
+            return self._error(404, "unknown route: " + path)
+        except Exception as e:
             return self._error(500, "server error: " + str(e))
 
     # -- route handlers ----------------------------------------------------
@@ -1200,31 +1371,71 @@ class Handler(BaseHTTPRequestHandler):
         if not filename:
             return self._error(400, "missing filename (send X-Filename header "
                                "or ?filename=)")
-        # The browser sends URL-encoded filenames for non-ASCII characters.
         filename = unquote(filename)
-        # Guard against path traversal in the supplied filename.
         filename = os.path.basename(filename)
         ext = os.path.splitext(filename)[1].lower()
         if ext not in (".epub", ".pdf"):
             return self._error(400, "unsupported file type: " + ext)
 
-        # Spool to a temp file under DATA_DIR, import, then clean up.
-        # Use a per-request unique name (pid alone collides under
-        # ThreadingHTTPServer when two uploads of the same extension land
-        # at once); uuid guarantees no collision on the temp path.
+        # Duplicate detection: hash first 1MB + file size
+        content_hash = hashlib.sha256(
+            raw[:1_000_000] + str(len(raw)).encode()).hexdigest()[:16]
+        lib = load_library()
+        for bid, b in lib.items():
+            if b.get("content_hash") == content_hash:
+                return self._error(409,
+                    "this file was already imported as \"" + b.get("title", "?") + "\"")
+
         ensure_dirs()
-        tmp_name = "_upload_%s_%d%s" % (uuid.uuid4().hex, os.getpid(), ext)
+        tmp_name = "_import_%s_%d%s" % (uuid.uuid4().hex, os.getpid(), ext)
         tmp_path = os.path.join(DATA_DIR, tmp_name)
+        # Spool, import, then keep the source file for page-image serving
         try:
             with open(tmp_path, "wb") as fh:
                 fh.write(raw)
-            summary = import_file(tmp_path)
-        finally:
-            try:
-                if os.path.isfile(tmp_path):
-                    os.remove(tmp_path)
-            except OSError:
-                pass
+            bid_placeholder = uuid.uuid4().hex[:12]
+            source_path = os.path.join(SOURCES_DIR, bid_placeholder + ext)
+            os.rename(tmp_path, source_path)
+            summary = import_file(source_path)
+        except Exception:
+            for p in [tmp_path]:
+                try: os.remove(p)
+                except OSError: pass
+            raise
+
+        # Attach hash + permanent source path to the book record
+        try:
+            book = load_book(summary["id"])
+            if book:
+                book["content_hash"] = content_hash
+                book["source_path"] = source_path
+                save_book(book)
+                lib2 = load_library()
+                lib2[summary["id"]] = _summary(book)
+                save_library(lib2)
+        except Exception:
+            pass  # non-fatal
+        summary["content_hash"] = content_hash
+
+        # Fetch Douban rating (non-blocking, best-effort)
+        try:
+            rating_data = fetch_douban_rating(
+                summary.get("title", ""),
+                summary.get("author", ""))
+            if rating_data:
+                book2 = load_book(summary["id"])
+                if book2:
+                    book2["douban_rating"] = rating_data.get("rating")
+                    book2["douban_rating_count"] = rating_data.get("rating_count")
+                    save_book(book2)
+                    lib3 = load_library()
+                    lib3[summary["id"]] = _summary(book2)
+                    save_library(lib3)
+                    summary["douban_rating"] = rating_data.get("rating")
+                    summary["douban_rating_count"] = rating_data.get("rating_count")
+        except Exception:
+            pass  # non-fatal
+
         return self._send_json(summary, status=201)
 
     @staticmethod
@@ -1275,13 +1486,19 @@ class Handler(BaseHTTPRequestHandler):
             "ok": True,
         })
 
-    def _library(self):
+    def _library(self, qs):
         lib = load_library()
-        # Return as a list, newest-first by imported_at.
         items = list(lib.values())
-        items.sort(key=lambda b: b.get("imported_at") or "",
-                   reverse=True)
-        return self._send_json({"books": items, "count": len(items)})
+        sort_by = (qs.get("sort", ["imported"])[0] or "imported").lower()
+        if sort_by == "title":
+            items.sort(key=lambda b: (b.get("title") or "").lower())
+        elif sort_by == "author":
+            items.sort(key=lambda b: (b.get("author") or "").lower())
+        elif sort_by == "recent":
+            items.sort(key=lambda b: b.get("updated_at") or "", reverse=True)
+        else:
+            items.sort(key=lambda b: b.get("imported_at") or "", reverse=True)
+        return self._send_json({"books": items, "count": len(items), "sort": sort_by})
 
     def _book(self, path, qs):
         # path looks like /api/reader/book/<id>
@@ -1366,6 +1583,230 @@ class Handler(BaseHTTPRequestHandler):
         # mime guess for any legacy files.
         mime = mimetypes.guess_type(fpath)[0] or "image/jpeg"
         return self._send_bytes(data, mime)
+
+    def _search(self, qs):
+        """Full-text search across every book in the library.
+
+        ``GET /api/reader/search?q=<query>`` returns, for each matching
+        book, the book summary plus a list of ``{page, snippet}`` matches
+        (up to ``SEARCH_MAX_PER_BOOK`` pages). Books whose title or author
+        also match the query are returned even with no content matches and
+        are sorted first. Snippets are ~``SEARCH_SNIPPET`` chars centred on
+        the first hit on a page.
+        """
+        raw_q = (qs.get("q", [""])[0] or "").strip()
+        if not raw_q:
+            return self._send_json(
+                {"query": "", "results": [], "count": 0})
+        q = raw_q.lower()
+        lib = load_library()
+        results = []
+        for book_id, _summary_rec in lib.items():
+            book = load_book(book_id)
+            if book is None:
+                continue
+            title = book.get("title") or ""
+            author = book.get("author") or ""
+            title_match = q in title.lower()
+            author_match = q in author.lower()
+            pages = book.get("pages") or []
+            matches = []
+            for i, page_text in enumerate(pages):
+                # Case-insensitive substring search; record the first hit
+                # per page with a context snippet around it.
+                idx = page_text.lower().find(q)
+                if idx == -1:
+                    continue
+                half = SEARCH_SNIPPET // 2
+                start = max(0, idx - half)
+                end = min(len(page_text), idx + len(q) + half)
+                snippet = page_text[start:end]
+                if start > 0:
+                    snippet = "…" + snippet
+                if end < len(page_text):
+                    snippet = snippet + "…"
+                # Collapse newlines in the snippet for a tidy one-line preview.
+                snippet = re.sub(r"\s+", " ", snippet).strip()
+                matches.append({"page": i + 1, "snippet": snippet})
+                if len(matches) >= SEARCH_MAX_PER_BOOK:
+                    break
+            if not (title_match or author_match or matches):
+                continue
+            results.append({
+                "id": book_id,
+                "title": title,
+                "author": author,
+                "cover_url": book.get("cover_url"),
+                "page_count": book.get("page_count", 0),
+                "last_page": book.get("last_page", 1),
+                "source_format": book.get("source_format"),
+                "title_match": title_match,
+                "author_match": author_match,
+                "match_count": len(matches),
+                "matches": matches,
+            })
+        # Books with a title/author hit float to the top; within each tier,
+        # more content matches rank higher.
+        results.sort(
+            key=lambda r: (not (r["title_match"] or r["author_match"]),
+                           -r["match_count"]))
+        return self._send_json({
+            "query": raw_q,
+            "results": results,
+            "count": len(results),
+        })
+
+    def _delete_book(self, path):
+        """DELETE /api/reader/book/<id> — remove a book and its cover."""
+        book_id = path.rsplit("/", 1)[-1]
+        if not book_id:
+            return self._error(400, "missing book id")
+        lib = load_library()
+        if book_id not in lib:
+            return self._error(404, "book not found: " + book_id)
+        # Remove book data file
+        book_path = os.path.join(DATA_DIR, "books", book_id + ".json")
+        try:
+            os.remove(book_path)
+        except OSError:
+            pass
+        # Remove cover images
+        _remove_cover_files(book_id)
+        # Remove from library index
+        del lib[book_id]
+        save_library(lib)
+        return self._send_json({"deleted": book_id, "ok": True})
+
+    def _page_image(self, path, qs):
+        """GET /api/reader/page-image/:bookId/:pageNum — render a PDF page as JPEG."""
+        parts = path.split("/")
+        if len(parts) < 2:
+            return self._error(400, "missing page number")
+        try:
+            page_num = int(parts[-1])
+        except ValueError:
+            return self._error(400, "invalid page number")
+        book_id = parts[-2]
+        book = load_book(book_id)
+        if not book:
+            return self._error(404, "book not found")
+        source = book.get("source_path", "")
+        if not source or not os.path.isfile(source):
+            return self._error(404, "source file not available")
+        is_thumb = qs.get("size", [""])[0] == "thumb"
+        max_w = 200 if is_thumb else 1200
+        try:
+            img_bytes = _pdf_page_to_jpeg(source, page_num, max_w)
+            if img_bytes is None:
+                return self._error(404, "no image found on page " + str(page_num))
+            return self._send_bytes(img_bytes, "image/jpeg")
+        except Exception as e:
+            return self._error(500, "failed to render page: " + str(e))
+
+    def _edit_book(self, path):
+        """PATCH /api/reader/book/:id — update title/author."""
+        book_id = path.rsplit("/", 1)[-1]
+        if not book_id:
+            return self._error(400, "missing book id")
+        body, err = self._read_json_body()
+        if err:
+            return self._error(400, err)
+        book = load_book(book_id)
+        if not book:
+            return self._error(404, "book not found")
+        if "title" in body:
+            book["title"] = str(body["title"]).strip() or book["title"]
+        if "author" in body:
+            book["author"] = str(body["author"]).strip() or book["author"]
+        save_book(book)
+        lib = load_library()
+        if book_id in lib:
+            lib[book_id]["title"] = book["title"]
+            lib[book_id]["author"] = book["author"]
+            save_library(lib)
+        return self._send_json({"id": book_id, "title": book["title"],
+                                "author": book["author"], "ok": True})
+
+    def _refine_metadata(self):
+        """POST /api/reader/refine-metadata — use LLM to extract title/author.
+        
+        Body: {"bookId": "<id>"}. Reads the book's filename and first ~2000 chars
+        of text, sends to DeepSeek, and returns the refined title + author."""
+        body, err = self._read_json_body()
+        if err:
+            return self._error(400, err)
+        book_id = (body.get("bookId") or body.get("book_id") or "").strip()
+        if not book_id:
+            return self._error(400, "missing 'bookId'")
+        book = load_book(book_id)
+        if not book:
+            return self._error(404, "book not found: " + book_id)
+        
+        if not LLM_API_KEY:
+            return self._error(500, "LLM API key not configured")
+        
+        # Gather context: filename + first chunk of text
+        fname = os.path.basename(book.get("source_path", ""))
+        pages = book.get("pages", [])
+        text_sample = pages[0][:2000] if pages else ""
+        
+        prompt = (
+            "Extract the real title and author from this ebook metadata.\n"
+            "Respond with ONLY a JSON object: {\"title\": \"...\", \"author\": \"...\"}.\n\n"
+            "Filename: " + fname + "\n"
+            "Current title: " + (book.get("title") or "Unknown") + "\n"
+            "Current author: " + (book.get("author") or "Unknown") + "\n"
+            "Text sample:\n" + (text_sample or "(no text extracted)")
+        )
+        
+        try:
+            import urllib.request as ur
+            req = ur.Request(LLM_API_URL, json.dumps({
+                "model": LLM_MODEL,
+                "messages": [
+                    {"role": "system", "content": "You are a precise metadata extractor. Return only JSON."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0,
+                "max_tokens": 200
+            }).encode(), {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + LLM_API_KEY
+            })
+            resp = ur.urlopen(req, timeout=15)
+            data = json.loads(resp.read())
+            content = data["choices"][0]["message"]["content"].strip()
+            # Extract JSON from response (may be wrapped in ```json)
+            if "```" in content:
+                content = content.split("```")[1]
+                if content.startswith("json"):
+                    content = content[4:]
+                content = content.strip()
+            result = json.loads(content)
+            title = (result.get("title") or "").strip()
+            author = (result.get("author") or "").strip()
+            if not title:
+                return self._error(500, "LLM returned empty title")
+            
+            # Update book
+            book["title"] = title
+            book["author"] = author
+            save_book(book)
+            # Update library index
+            lib = load_library()
+            if book_id in lib:
+                lib[book_id]["title"] = title
+                lib[book_id]["author"] = author
+                save_library(lib)
+            
+            return self._send_json({
+                "bookId": book_id,
+                "title": title,
+                "author": author,
+                "refined": True
+            })
+        except Exception as e:
+            return self._error(500, "LLM refinement failed: " + str(e))
 
     def _search(self, qs):
         """Full-text search across every book in the library.
