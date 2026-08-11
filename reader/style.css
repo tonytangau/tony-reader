@@ -25,37 +25,19 @@
   --dot-fs-reader-art:    48px;   /* large decorative glyph    */
 }
 /* ------------------------------------------------------------
-   Reading themes — three colour palettes for the reading view.
-   The Chrome (sidebar, toolbar, app bar) always stays dark;
-   only the reading column switches palettes. Default: sepia.
+   Reading theme — warm dark, optimized for long-session eye
+   comfort. Deep warm charcoal background + amber-cream text
+   (Kindle / Apple Books / BMW dashboard research-backed).
+   Single theme, no switching.
    ------------------------------------------------------------ */
-:root {
-  /* Sepia — Kindle-like warm paper (default) */
-  --reader-page-bg:    #FBF0D9;
-  --reader-page-text:  #5F4B32;
-  --reader-page-accent:#8B7355;
-  --reader-page-border:#E8DCC8;
-}
-
-[data-reader-theme="sepia"] {
-  --reader-page-bg:    #FBF0D9;
-  --reader-page-text:  #5F4B32;
-  --reader-page-accent:#8B7355;
-  --reader-page-border:#E8DCC8;
-}
-
-[data-reader-theme="light"] {
-  --reader-page-bg:    #FFFFFF;
-  --reader-page-text:  #1A1A1A;
-  --reader-page-accent:#4A4A4A;
-  --reader-page-border:#E0E0E0;
-}
-
+:root,
+[data-reader-theme="sepia"],
+[data-reader-theme="light"],
 [data-reader-theme="dark"] {
-  --reader-page-bg:    #1E1E22;
-  --reader-page-text:  #D4D4D4;
-  --reader-page-accent:#8A8A8A;
-  --reader-page-border:#2E2E33;
+  --reader-page-bg:    #1C1A17;
+  --reader-page-text:  #D4C4A0;
+  --reader-page-accent:#B8A88A;
+  --reader-page-border:#2A2824;
 }
 
 
@@ -123,9 +105,41 @@
 .reader-appbar__actions {
   display: flex;
   align-items: center;
-  gap: var(--dot-space-2);
+  gap: var(--dot-space-3);
   flex-shrink: 0;
 }
+
+/* ---- Theme switcher (Dark / Sepia / Light) ---- */
+.reader-theme-switch {
+  display: flex;
+  gap: 2px;
+  margin-right: var(--dot-space-2);
+  padding: 2px;
+  border-radius: var(--dot-radius-md);
+  background: var(--dot-bg-surface);
+  border: 1px solid var(--dot-border);
+}
+.reader-theme-btn {
+  width: 28px; height: 28px;
+  border: none; border-radius: var(--dot-radius-sm);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  background: transparent;
+  transition: background 0.15s, color 0.15s;
+  color: var(--dot-text-tertiary);
+}
+.reader-theme-btn:hover { color: var(--dot-text-primary); }
+.reader-theme-btn.active {
+  background: var(--dot-primary);
+  color: var(--dot-primary-on);
+}
+.reader-theme-btn[data-theme="dark"]  { color: #8A8A8A; }
+.reader-theme-btn[data-theme="dark"].active  { background: #3A3A44; color: #D4D4D4; }
+.reader-theme-btn[data-theme="sepia"] { color: #C4A97D; }
+.reader-theme-btn[data-theme="sepia"].active { background: #C4A97D; color: #FFF; }
+.reader-theme-btn[data-theme="light"] { color: #999; }
+.reader-theme-btn[data-theme="light"].active { background: #666; color: #FFF; }
 
 /* The native file input is hidden; the Import button triggers it. */
 .reader-file-input {
@@ -243,6 +257,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
+}
+.reader-sidebar__row-rating {
+  color: #f5a623;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
 }
 .reader-sidebar__row-bar {
   height: 3px;
@@ -422,6 +441,14 @@ body.is-reading .reader-library { display: none; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.reader-card__rating {
+  font-size: var(--dot-fs-small);
+  color: #f5a623;
+  line-height: var(--dot-lh-snug);
+  white-space: nowrap;            /* ★★★★★ 9.0 (3,933人评价) — no wrap */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .reader-card__progress {
   display: flex;
@@ -586,6 +613,7 @@ body.is-reading .reader-library { display: none; }
   padding: var(--dot-space-16) var(--dot-space-6);
   text-align: center;
 }
+.reader-empty[hidden] { display: none; }
 .reader-empty__art {
   font-size: var(--dot-fs-reader-art);
   color: var(--dot-text-tertiary);

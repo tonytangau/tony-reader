@@ -72,6 +72,8 @@
   const rvFontInc   = document.getElementById('rv-font-inc');
   const rvFontDec   = document.getElementById('rv-font-dec');
   const rvFontFam   = document.getElementById('rv-font-family');
+  const rvPageJump    = null;  // not in current HTML
+  const rvPagerLabel  = null;  // not in current HTML
   const rvFsBtn     = document.getElementById('rv-fullscreen');
   const rvTocBtn    = document.getElementById('rv-toc-btn');
   const rvToc       = document.getElementById('rv-toc');
@@ -287,6 +289,12 @@ const THEME_KEY = 'dot.reader.theme';
   // ============================================================
   async function loadLibrary() {
     metaEl.textContent = 'Loading…';
+    // Check for server-injected library data first
+    if (window.__LIBRARY__ && window.__LIBRARY__.books) {
+      library = window.__LIBRARY__.books;
+      render();
+      return;
+    }
     try {
       const res = await fetch(api('/api/reader/library'), { cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -391,10 +399,16 @@ const THEME_KEY = 'dot.reader.theme';
     const author = document.createElement('span');
     author.className = 'reader-sidebar__row-author';
     author.textContent = book.author || 'Unknown';
+    const rating = document.createElement('span');
+    rating.className = 'reader-sidebar__row-rating';
+    if (book.douban_rating != null) {
+      rating.textContent = '★ ' + book.douban_rating.toFixed(1);
+    }
     const pc = Number(book.page_count || 0);
     const pos = document.createElement('span');
     pos.textContent = pc ? (pct(book) + '%') : '—';
     meta.appendChild(author);
+    meta.appendChild(rating);
     meta.appendChild(pos);
 
     const bar = document.createElement('div');
@@ -452,6 +466,15 @@ const THEME_KEY = 'dot.reader.theme';
     authorEl.className = 'reader-card__author';
     authorEl.textContent = book.author || 'Unknown author';
 
+    // Douban rating
+    const ratingEl = document.createElement('div');
+    ratingEl.className = 'reader-card__rating';
+    const r = book.douban_rating;
+    if (r != null) {
+      const stars = '★'.repeat(Math.round(r)) + '☆'.repeat(5 - Math.round(r));
+      ratingEl.textContent = stars + ' ' + r.toFixed(1);
+    }
+
     const progress = document.createElement('div');
     progress.className = 'reader-card__progress';
 
@@ -479,6 +502,7 @@ const THEME_KEY = 'dot.reader.theme';
     card.appendChild(cover);
     card.appendChild(titleEl);
     card.appendChild(authorEl);
+    card.appendChild(ratingEl);
     card.appendChild(progress);
 
     card.addEventListener('click', () => openReader(book));
@@ -766,7 +790,6 @@ const THEME_KEY = 'dot.reader.theme';
   async function loadPage(page) {
     if (!currentBook) return;
     rvPage.textContent = 'Loading…';
-    rvPager.textContent = '';
     rvPrev.disabled = true;
     rvNext.disabled = true;
     try {
@@ -785,9 +808,8 @@ const THEME_KEY = 'dot.reader.theme';
       const pc = currentBook.page_count;
       const pctVal = pc ? Math.round((currentBook.page / pc) * 100) : 0;
       rvPos.textContent = pctVal + '%';
-      rvPager.textContent = pc
-        ? ('Page ' + currentBook.page + ' of ' + pc)
-        : ('Page ' + currentBook.page);
+      if (rvPageJump) { rvPageJump.max = pc || 1; rvPageJump.value = currentBook.page; }
+      if (rvPagerLabel) rvPagerLabel.textContent = pc ? ('of ' + pc) : '';
       rvPrev.disabled = currentBook.page <= 1;
       rvNext.disabled = pc ? currentBook.page >= pc : true;
       rvPage.scrollTop = 0;
@@ -1060,6 +1082,30 @@ const THEME_KEY = 'dot.reader.theme';
     document.body.classList.remove('is-dragging');
     handleFiles(e.dataTransfer.files);
   });
+
+  // ---- Theme switcher -------------------------------------------------
+  (function initThemeSwitch() {
+    const container = document.getElementById('theme-switch');
+    if (!container) return;
+    const readingPane = document.getElementById('reader-view');
+    const saved = localStorage.getItem('reader-theme') || 'dark';
+    if (readingPane) readingPane.setAttribute('data-reader-theme', saved);
+    container.querySelectorAll('.reader-theme-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.theme === saved);
+      btn.setAttribute('aria-checked', btn.dataset.theme === saved);
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        container.querySelectorAll('.reader-theme-btn').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-checked', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
+        if (readingPane) readingPane.setAttribute('data-reader-theme', theme);
+        localStorage.setItem('reader-theme', theme);
+      });
+    });
+  })();
 
   // ---- Initial render -------------------------------------------------
   applyFontPrefs();
