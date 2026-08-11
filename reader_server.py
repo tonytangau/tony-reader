@@ -1465,9 +1465,10 @@ class Handler(BaseHTTPRequestHandler):
     def _save_progress(self):
         """Persist reading position for a book.
 
-        Body: {"bookId": "<id>", "page": <int>}. Updates last_page,
-        last_position and updated_at on both the full book record and the
-        library index. Idempotent and safe to call on every page turn.
+        Body: {"bookId": "<id>", "page": <int>[, "position": <float 0-1>]}.
+        Updates last_page, last_position and updated_at on both the full
+        book record and the library index. Idempotent and safe to call
+        on every scroll event.
         """
         body, err = self._read_json_body()
         if err:
@@ -1488,7 +1489,13 @@ class Handler(BaseHTTPRequestHandler):
         if page_count and page > page_count:
             page = page_count
         book["last_page"] = page
-        book["last_position"] = round(page / max(page_count, 1), 4)
+        # Accept explicit position fraction (for continuous scroll), or
+        # compute from page/page_count.
+        if "position" in body:
+            pos = float(body["position"])
+            book["last_position"] = round(max(0.0, min(1.0, pos)), 4)
+        else:
+            book["last_position"] = round(page / max(page_count, 1), 4)
         book["updated_at"] = (datetime.datetime.utcnow()
                               .isoformat(timespec="seconds") + "Z")
         self._persist_progress(book)

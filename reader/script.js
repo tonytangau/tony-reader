@@ -794,42 +794,58 @@ const THEME_KEY = 'dot.reader.theme';
     if (!currentBook) return;
     const pc = currentBook.page_count;
     if (!pc) return;
-    rvPage.textContent = 'Loading…';
-    rvNav.hidden = true;  // no need for prev/next with continuous scroll
+    rvNav.hidden = true;
 
+    const BATCH = 5;
+    const allContent = new Array(pc);
+    let loaded = 0, failed = 0;
+
+    rvPage.innerHTML = '<p style="text-align:center;padding:4rem 0">Loading…</p>';
+
+    // First page (to get TOC)
     try {
-      // Fetch all pages in parallel
+      const url0 = api('/api/reader/book/' + encodeURIComponent(currentBook.id) + '?page=1');
+      const r0 = await fetch(url0, { cache: 'no-store' });
+      if (r0.ok) {
+        const d0 = await r0.json();
+        allContent[0] = d0.content || '';
+        if (currentBook.toc === null && Array.isArray(d0.toc)) {
+          currentBook.toc = d0.toc;
+          setupToc();
+        }
+        loaded++;
+      } else { failed++; }
+    } catch (_) { failed++; }
+    showLoadProgress(loaded, failed, pc);
+
+    // Remaining pages in batches
+    for (let batchStart = 1; batchStart < pc; batchStart += BATCH) {
+      const batchEnd = Math.min(batchStart + BATCH, pc);
       const promises = [];
-      for (let p = 1; p <= pc; p++) {
-        const url = api('/api/reader/book/' + encodeURIComponent(currentBook.id) +
-                        '?page=' + p);
-        promises.push(fetch(url, { cache: 'no-store' }).then(r => r.json()));
+      for (let p = batchStart; p < batchEnd; p++) {
+        const url = api('/api/reader/book/' + encodeURIComponent(currentBook.id) + '?page=' + p);
+        promises.push(
+          fetch(url, { cache: 'no-store' })
+            .then(r => r.ok ? r.json() : Promise.reject(r.status))
+            .then(d => { allContent[p] = d.content || ''; loaded++; })
+            .catch(() => { allContent[p] = ''; failed++; })
+        );
       }
-      const allData = await Promise.all(promises);
-
-      // Extract TOC from first page
-      if (currentBook.toc === null) {
-        currentBook.toc = Array.isArray(allData[0].toc) ? allData[0].toc : [];
-        setupToc();
-      }
-
-      // Concatenate all content with page separators
-      let allContent = '';
-      for (let i = 0; i < allData.length; i++) {
-        if (i > 0) allContent += '\n\n';
-        allContent += (allData[i].content || '');
-      }
-
-      renderPageContent(allContent);
-      rvPos.textContent = pc + ' pages loaded';
-      rvPage.scrollTop = 0;
-
-      // Track scroll progress
-      rvPage.addEventListener('scroll', trackScrollProgress);
-    } catch (e) {
-      rvPage.textContent = 'Failed to load: ' + e.message;
-      rvNav.hidden = false;
+      await Promise.all(promises);
+      showLoadProgress(loaded, failed, pc);
     }
+
+    // Render
+    const text = allContent.join('\n\n');
+    renderPageContent(text);
+    rvPos.textContent = (failed ? loaded + '/' + pc + ' pages' : '100% loaded');
+    rvPage.scrollTop = 0;
+    rvPage.addEventListener('scroll', trackScrollProgress);
+  }
+
+  function showLoadProgress(loaded, failed, total) {
+    rvPos.textContent = 'Loading ' + loaded + '/' + total +
+      (failed ? ' (' + failed + ' failed)' : '');
   }
 
   function trackScrollProgress() {
@@ -839,6 +855,13 @@ const THEME_KEY = 'dot.reader.theme';
     if (pct <= 0) return;
     const progress = Math.round((el.scrollTop / pct) * 100);
     rvPos.textContent = progress + '% read';
+    // Update library progress (throttled via requestAnimationFrame-ish)
+    if (!trackScrollProgress._t) {
+      trackScrollProgress._t = setTimeout(() => {
+        trackScrollProgress._t = null;
+        saveProgress(currentBook.id, 1, progress / 100);
+      }, 2000);
+    }
   }
 
   // Render extracted plain text as clean paragraphs. Book pages are stored
@@ -862,13 +885,15 @@ const THEME_KEY = 'dot.reader.theme';
     }
   }
 
-  async function saveProgress(bookId, page) {
+  async function saveProgress(bookId, page, position) {
     if (!bookId) return;
     try {
+      const body = { bookId: bookId, page: page };
+      if (position != null) body.position = position;
       await fetch(api('/api/reader/progress'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookId: bookId, page: page }),
+        body: JSON.stringify(body),
       });
     } catch (_) { /* progress save is best-effort */ }
   }
