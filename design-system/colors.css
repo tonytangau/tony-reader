@@ -146,88 +146,88 @@
 }
 
 /* ============================================================
-   DARK THEME — warm near-black, not pure #000.
-   Backgrounds carry a faint warm cast so blacks don't feel
-   harsh/cold. Text is off-white. Status fg brightens for AA
-   on dark surfaces.
+   DARK THEME — Matcha soft-dark.
+   Green-tinted near-black, never harsh. Cards float with
+   subtle rounded borders. Text is warm off-white. Accent is
+   a muted sage green ("matcha"). All three apps share this.
    ============================================================ */
 :root[data-theme="dark"],
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --dot-primary:         #4f70d2;  /* soft azure, brighter on dark */
-  --dot-primary-hover:   #5f7edd;
-  --dot-primary-active:  #4466c0;
-  --dot-primary-press:   #3b5ab0;
-  --dot-primary-subtle:  rgba(79, 112, 210, 0.16);
-  --dot-primary-subtle-2: rgba(79, 112, 210, 0.24);
-  --dot-primary-on:      #ffffff;
-  --dot-primary-fg:      #a8bfea;
+  --dot-primary:         #8BA888;  /* matcha sage — buttons, links, focus */
+  --dot-primary-hover:   #9BB898;
+  --dot-primary-active:  #7B9A78;
+  --dot-primary-press:   #6C8B69;
+  --dot-primary-subtle:  rgba(139, 168, 136, 0.14);
+  --dot-primary-subtle-2: rgba(139, 168, 136, 0.22);
+  --dot-primary-on:      #1A1D1B;
+  --dot-primary-fg:      #B5CCB1;
 
-  --dot-gray-1: #e9e9ec;
-  --dot-gray-2: #9a9ca3;
-  --dot-gray-3: #2a2a2e;
-  --dot-gray-4: #26262b;
+  --dot-gray-1: #D8DBD4;   /* text-primary: warm off-white       */
+  --dot-gray-2: #969B93;   /* text-secondary: muted sage-gray    */
+  --dot-gray-3: #353935;   /* border: whisper-thin                */
+  --dot-gray-4: #282B28;   /* fill: subtle surface                */
 
-  --dot-text-primary:    #e9e9ec;
-  --dot-text-secondary:  #9a9ca3;
-  --dot-text-tertiary:   #6a6c73;
-  --dot-text-disabled:   #4a4c52;
-  --dot-text-on-primary: #ffffff;
+  --dot-text-primary:    #D8DBD4;
+  --dot-text-secondary:  #969B93;
+  --dot-text-tertiary:   #6B7068;
+  --dot-text-disabled:   #4A4F48;
+  --dot-text-on-primary: #1A1D1B;
 
-  --dot-border:         #2a2a2e;
-  --dot-border-strong:  #3a3a40;
-  --dot-border-subtle:  #222226;
+  --dot-border:         #353935;
+  --dot-border-strong:  #454A44;
+  --dot-border-subtle:  #2A2D2A;
 
-  --dot-bg:          #161617;   /* warm near-black canvas */
-  --dot-bg-elevated: #1d1d1f;   /* cards / popovers        */
-  --dot-bg-surface:  #26262b;   /* hover fills             */
-  --dot-bg-sunken:   #101012;   /* gutters / inset         */
+  --dot-bg:          #1A1D1B;   /* matcha-dark canvas             */
+  --dot-bg-elevated: #212522;   /* cards / popovers               */
+  --dot-bg-surface:  #282B28;   /* hover fills / chips            */
+  --dot-bg-sunken:   #141715;   /* gutters / inset                */
   --dot-bg-overlay:  rgba(0, 0, 0, 0.55);
 
-  --dot-status-done:        #8FB5A2;  /* muted sage, brightened for dark AA */
-  --dot-status-done-bg:     rgba(143, 181, 162, 0.16);
-  --dot-status-done-fg:     #8FB5A2;
+  --dot-status-done:        #7DA88A;
+  --dot-status-done-bg:     rgba(125, 168, 138, 0.16);
+  --dot-status-done-fg:     #7DA88A;
 
-  --dot-status-progress:    #C2A878;  /* muted amber, brightened */
-  --dot-status-progress-bg: rgba(194, 168, 120, 0.16);
-  --dot-status-progress-fg: #C2A878;
+  --dot-status-progress:    #B8A878;
+  --dot-status-progress-bg: rgba(184, 168, 120, 0.16);
+  --dot-status-progress-fg: #B8A878;
 
-  --dot-status-todo:        #9ca3af;
-  --dot-status-todo-bg:     rgba(156, 163, 175, 0.14);
-  --dot-status-todo-fg:     #9ca3af;
+  --dot-status-todo:        #8A8F88;
+  --dot-status-todo-bg:     rgba(138, 143, 136, 0.14);
+  --dot-status-todo-fg:     #8A8F88;
 
-  --dot-status-agent:       #A89BC0;  /* muted violet, brightened */
-  --dot-status-agent-bg:    rgba(168, 155, 192, 0.16);
-  --dot-status-agent-fg:    #A89BC0;
+  --dot-status-agent:       #A898B8;
+  --dot-status-agent-bg:    rgba(168, 152, 184, 0.16);
+  --dot-status-agent-fg:    #A898B8;
 
-  --dot-danger:        #f87171;
-  --dot-danger-hover:  #f98a8a;
-  --dot-danger-active: #ef5e5e;
-  --dot-danger-bg:     rgba(248, 113, 113, 0.14);
-  --dot-danger-fg:     #f87171;
-  --dot-danger-on:     #1d1d1f;
+  --dot-danger:        #E07070;
+  --dot-danger-hover:  #E88888;
+  --dot-danger-active: #D06060;
+  --dot-danger-bg:     rgba(224, 112, 112, 0.14);
+  --dot-danger-fg:     #E07070;
+  --dot-danger-on:     #1A1D1B;
 
-  --dot-info:        #8A9CB8;  /* desaturated slate blue */
+  --dot-info:        #8A9CB8;
   --dot-info-bg:     rgba(138, 156, 184, 0.16);
   --dot-info-fg:     #8A9CB8;
 
-  --dot-warning:        #C2A878;  /* muted amber */
-  --dot-warning-bg:     rgba(194, 168, 120, 0.16);
-  --dot-success:        #8FB5A2;  /* muted sage */
-  --dot-success-bg:     rgba(143, 181, 162, 0.16);
+  --dot-warning:        #B8A878;
+  --dot-warning-bg:     rgba(184, 168, 120, 0.16);
+  --dot-success:        #7DA88A;
+  --dot-success-bg:     rgba(125, 168, 138, 0.16);
 
-  --dot-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.40);
-  --dot-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40),
-                   0 1px 3px rgba(0, 0, 0, 0.50);
-  --dot-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.45),
-                   0 6px 16px rgba(0, 0, 0, 0.55);
-  --dot-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.50),
-                   0 16px 40px rgba(0, 0, 0, 0.60);
-  --dot-shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.55),
-                   0 24px 56px rgba(0, 0, 0, 0.65);
-  --dot-shadow-focus: 0 0 0 3px rgba(79, 112, 210, 0.35);
+  --dot-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --dot-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35),
+                   0 1px 3px rgba(0, 0, 0, 0.45);
+  --dot-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.40),
+                   0 6px 16px rgba(0, 0, 0, 0.50);
+  --dot-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.45),
+                   0 16px 40px rgba(0, 0, 0, 0.55);
+  --dot-shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.50),
+                   0 24px 48px rgba(0, 0, 0, 0.60);
+  --dot-shadow-focus: 0 0 0 3px rgba(139, 168, 136, 0.30);
 
   --dot-focus-ring: 0 0 0 2px var(--dot-bg),
-                    0 0 0 4px rgba(79, 112, 210, 0.65);
+                    0 0 0 4px rgba(139, 168, 136, 0.50);
 }

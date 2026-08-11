@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tony 体重趋势</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;padding:20px;max-width:900px;margin:0 auto}
+h1{font-size:18px;color:#38bdf8;margin-bottom:2px}
+.sub{font-size:12px;color:#64748b;margin-bottom:16px}
+.box{background:#1e293b;border-radius:12px;padding:16px;margin-bottom:12px}
+canvas{display:block;width:100%}
+.stats{display:flex;gap:12px;margin-top:10px}
+.stat{flex:1;background:#0f172a;border-radius:8px;padding:10px;text-align:center}
+.stat .val{font-size:18px;font-weight:700}.stat .lbl{font-size:11px;color:#64748b;margin-top:2px}
+.g{color:#34d399}
+</style>
+</head>
+<body>
+<h1>📊 Tony 体重趋势</h1>
+<div class="sub">6/6 → 8/7 · 62天 · ↓4.8kg · 体脂 27.1%→23.6%</div>
+<div class="box"><canvas id="c1"></canvas>
+<div class="stats">
+  <div class="stat"><div class="val g">↓4.8</div><div class="lbl">总减重 kg</div></div>
+  <div class="stat"><div class="val g">↓3.5%</div><div class="lbl">体脂变化</div></div>
+  <div class="stat"><div class="val">36.5</div><div class="lbl">骨骼肌 kg</div></div>
+  <div class="stat"><div class="val">−0.08</div><div class="lbl">日均减重</div></div>
+</div></div>
+<div class="box"><canvas id="c2"></canvas></div>
+<script src="body-log.js"></script>
+</body>
+</html>
