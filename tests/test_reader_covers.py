@@ -39,7 +39,14 @@ import time
 import urllib.request
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-READER_SERVER = os.path.join(REPO, "projects", "reader", "reader_server.py")
+# Resolve the real server file at runtime: the repo root layout is
+# reader_server.py, but older tests hard-coded "projects/reader/..."
+# from before the reorg. Fall back gracefully.
+_candidates = [
+    os.path.join(REPO, "reader_server.py"),
+    os.path.join(REPO, "projects", "reader", "reader_server.py"),
+]
+READER_SERVER = next((p for p in _candidates if os.path.isfile(p)), _candidates[0])
 
 # ---------------------------------------------------------------------------
 # Test helpers

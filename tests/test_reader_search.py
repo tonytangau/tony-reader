@@ -33,7 +33,15 @@ import zipfile
 from urllib.parse import parse_qs, urlencode
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-READER_SERVER = os.path.join(REPO, "projects", "reader", "reader_server.py")
+# The reader server lives at the repo root (reader_server.py). Older
+# tests referenced a stale "projects/reader/reader_server.py" path from
+# before the repo was reorganised; resolve the real file at import time
+# so the suite keeps working regardless of layout.
+_candidates = [
+    os.path.join(REPO, "reader_server.py"),
+    os.path.join(REPO, "projects", "reader", "reader_server.py"),
+]
+READER_SERVER = next((p for p in _candidates if os.path.isfile(p)), _candidates[0])
 
 
 # ---------------------------------------------------------------------------

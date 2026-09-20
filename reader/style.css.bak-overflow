@@ -50,7 +50,6 @@
    ------------------------------------------------------------ */
 .reader-body {
   min-height: 100vh;
-  overflow-x: hidden;
   background: var(--dot-bg);
   color: var(--dot-text-primary);
   display: flex;

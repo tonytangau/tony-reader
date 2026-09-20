@@ -4,10 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tony's Reader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/design-system/colors.css">
   <link rel="stylesheet" href="/design-system/typography.css">
   <link rel="stylesheet" href="/design-system/components.css">
-  <link rel="stylesheet" href="/reader/style.css?v=2">
+  <link rel="stylesheet" href="/reader/style.css?v=19">
 </head>
 <body class="reader-body">
 
@@ -15,7 +18,8 @@
        Top app bar — brand, search, import
        ============================================================ -->
   <header class="reader-appbar">
-    <div class="reader-appbar__brand">
+    <div class="reader-appbar__brand" id="brand-home" role="button"
+         tabindex="0" aria-label="Back to library" title="Back to library">
       <span class="reader-appbar__mark" aria-hidden="true">R</span>
       <span class="reader-appbar__title">Tony's Reader</span>
     </div>
@@ -32,11 +36,6 @@
     </div>
 
     <div class="reader-appbar__actions">
-      <div class="reader-theme-switch" id="theme-switch" role="radiogroup" aria-label="Reading theme" style="display:none">
-        <button class="reader-theme-btn active" data-theme="dark"  title="Dark"  aria-checked="true">◉</button>
-        <button class="reader-theme-btn"        data-theme="sepia" title="Sepia" aria-checked="false">◉</button>
-        <button class="reader-theme-btn"        data-theme="light" title="Light" aria-checked="false">◉</button>
-      </div>
       <button class="dot-btn dot-btn--primary dot-btn--lg" id="import-btn"
               aria-label="Import books">
         <span aria-hidden="true">＋</span>
@@ -80,6 +79,12 @@
         <section class="reader-search-results" id="search-results" hidden
                  aria-label="Search results"></section>
 
+        <!-- Continue reading (断点续读) — surfaces the most recently read
+             book with its saved position so a refresh / reopen jumps
+             straight back into reading. -->
+        <section class="reader-continue" id="continue-reading" hidden
+                 aria-label="Continue reading"></section>
+
         <!-- Grid is rendered here by script.js -->
         <section class="reader-grid" id="book-grid"
                  aria-label="Book library" aria-live="polite"></section>
@@ -108,41 +113,64 @@
            ============================================================ -->
       <section class="reader-view" id="reader-view" hidden
                aria-modal="true" role="dialog" aria-label="Reading view">
-        <!-- Floating top bar — fades out when idle for distraction-free reading -->
-        <header class="reader-view__bar" id="rv-bar">
-          <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-close"
-                  aria-label="Close reading view" title="Back to library (Esc)">✕</button>
-          <div class="reader-view__titles">
-            <span class="reader-view__title" id="rv-title"></span>
-            <span class="reader-view__author" id="rv-author"></span>
-          </div>
-          <div class="reader-view__tools">
-            <select class="reader-view__fontselect" id="rv-font-family"
-                    aria-label="Font family" title="Font family">
-              <option value="serif">Serif</option>
-              <option value="sans">Sans</option>
-              <option value="mono">Mono</option>
-            </select>
-            <select class="reader-view__fontselect" id="rv-theme"
-                    aria-label="Reading theme" title="Reading theme">
-              <option value="sepia">Sepia</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-            <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-font-dec"
-                    aria-label="Decrease font size" title="Smaller text">A−</button>
-            <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-font-inc"
-                    aria-label="Increase font size" title="Larger text">A+</button>
-            <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-toc-btn"
-                    aria-label="Toggle table of contents" title="Table of contents (t)"
-                    hidden>☰</button>
-            <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-fullscreen"
-                    aria-label="Toggle fullscreen" title="Fullscreen (f)">⤢</button>
-            <span class="reader-view__pos" id="rv-pos"></span>
-          </div>
-        </header>
 
-        <div class="reader-view__page dot-scroll" id="rv-page"></div>
+        <!-- Side panel toggle — top-right ☰ -->
+        <button class="reader-view__panel-toggle" id="rv-panel-toggle"
+                aria-label="Show reading controls" title="Controls">☰</button>
+
+        <!-- Three-dot menu — bottom-left -->
+        <button class="reader-view__dots" id="rv-dots"
+                aria-label="More options" title="Options">⋯</button>
+
+        <!-- Side panel — slides in from right -->
+        <aside class="reader-view__panel" id="rv-panel" hidden
+               aria-label="Reading controls">
+          <div class="reader-view__panel-head">
+            <span class="reader-view__panel-title">Controls</span>
+            <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-panel-close"
+                    aria-label="Close panel">✕</button>
+          </div>
+          <div class="reader-view__panel-body">
+            <div class="reader-view__titles">
+              <span class="reader-view__title" id="rv-title"></span>
+              <span class="reader-view__author" id="rv-author"></span>
+            </div>
+            <hr class="reader-view__panel-divider">
+            <div class="reader-view__tools">
+              <select class="reader-view__fontselect" id="rv-font-family"
+                      aria-label="Font family">
+                <option value="serif">Serif</option>
+                <option value="sans">Sans</option>
+                <option value="mono">Mono</option>
+              </select>
+              <div class="reader-view__fontrow">
+                <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-font-dec"
+                        aria-label="Decrease font size" title="Smaller text">A−</button>
+                <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-font-inc"
+                        aria-label="Increase font size" title="Larger text">A+</button>
+              </div>
+              <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-toc-btn"
+                      aria-label="Table of contents" title="Table of contents (t)"
+                      hidden>☰ TOC</button>
+              <button class="dot-btn dot-btn--ghost dot-btn--icon" id="rv-fullscreen"
+                      aria-label="Toggle fullscreen" title="Fullscreen (f)">⤢ Fullscreen</button>
+              <span class="reader-view__pos" id="rv-pos"></span>
+            </div>
+            <hr class="reader-view__panel-divider">
+            <div class="reader-highlights" id="rv-highlights">
+              <span class="reader-highlights__head">Highlights</span>
+              <div class="reader-highlights__list" id="rv-highlights-list"></div>
+            </div>
+            <button class="dot-btn dot-btn--secondary reader-view__panel-close-btn"
+                    id="rv-close" aria-label="Close reading view">
+              ✕ Close book
+            </button>
+          </div>
+        </aside>
+
+        <div class="reader-view__page dot-scroll" id="rv-page">
+          <div class="reader-view__content" id="rv-content"></div>
+        </div>
 
         <footer class="reader-view__nav" id="rv-nav">
           <button class="dot-btn dot-btn--secondary dot-btn--lg" id="rv-prev"
@@ -169,7 +197,14 @@
   <!-- Import progress toast -->
   <div class="reader-toast" id="import-toast" role="status" hidden></div>
 
+  <!-- Custom context menu (selection actions) -->
+  <div class="reader-ctxmenu" id="ctx-menu" hidden role="menu">
+    <button class="reader-ctxmenu__item" id="ctx-add-highlight" role="menuitem">
+      ✎ Add highlight
+    </button>
+  </div>
 
-  <script src="/reader/script.js?v=2"></script>
+
+  <script src="/reader/script.js?v=12"></script>
 </body>
 </html>

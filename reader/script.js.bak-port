@@ -1,7 +1,7 @@
 /* ============================================================
    Dot Reader — Library view logic
    Pure vanilla JS. Talks to the Reader API
-   (projects/reader/reader_server.py, default port 8085).
+   (projects/reader/reader_server.py, default port 8081).
 
    API:
      GET  /api/reader/library              -> { books, count }
@@ -27,14 +27,14 @@
   'use strict';
 
   // ---- API base -------------------------------------------------------
-  // The Reader API lives on its own dev server (:8085) while this page is
-  // served by the main Dot server (:8090). Default to the same hostname on
-  // 8085; allow an override via ?api=http://host:port (use ?api= for same
+  // The Reader API lives on its own dev server (:8081) while this page is
+  // served by the main Dot server (:8080). Default to the same hostname on
+  // 8081; allow an override via ?api=http://host:port (use ?api= for same
   // origin). Covers + book endpoints are prefixed with this base.
   const API_BASE = (() => {
     const ov = new URLSearchParams(location.search).get('api');
     if (ov !== null) return ov;                // ?api=  → same origin
-    return location.protocol + '//' + location.hostname + ':8085';
+    return location.protocol + '//' + location.hostname + ':8081';
   })();
   const api = (p) => API_BASE + p;
 

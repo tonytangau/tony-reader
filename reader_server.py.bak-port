@@ -4,7 +4,7 @@
 A single-file HTTP server (stdlib only at the transport layer) that lets the
 Reader UI import books, list a library, and read pages of extracted text.
 
-Runs on **:8085** (the main Dot server lives on :8090) so it can be developed
+Runs on **:8081** (the main Dot server lives on :8080) so it can be developed
 and restarted independently.
 
 Routes
@@ -58,7 +58,7 @@ from urllib.parse import urlparse, parse_qs, unquote
 # Configuration
 # ---------------------------------------------------------------------------
 HOST = "0.0.0.0"
-PORT = 8085
+PORT = 8081
 
 # DeepSeek API for metadata refinement — load key from .env in hermes root
 _DS_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
